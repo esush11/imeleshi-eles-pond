@@ -72,7 +72,7 @@ def page(slug, title, fonts, css, hero_html, how_items, open_note, prompt_file, 
   <section class="hero">
 {hero_html}
     <a class="preview" href="{d['versions'][0]['href']}" aria-label="open {html.escape(d['noun'])}"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
-    <div class="acts"><a class="btn" href="{d['versions'][0]['href']}">open it now →</a><a class="btn alt" href="{reel}" target="_blank" rel="noopener">watch the reel ↗</a></div>
+    <div class="acts"><a class="btn" href="{d['versions'][0]['href']}">open it now →</a><a class="btn alt" href="{reel or 'https://www.instagram.com/imeleshi/'}" target="_blank" rel="noopener">{'watch the reel ↗' if reel else 'follow on instagram ↗'}</a></div>
   </section>
 
   <p class="kicker">two ways to try it</p>
@@ -240,3 +240,39 @@ PAGES = {
    x.fillStyle='#ff1010';x.beginPath();x.arc(d[0],d[1],W*.011,0,6.28);x.fill();});
   x.fillStyle='#ff1010';x.beginPath();x.arc(th[0],th[1],W*.011,0,6.28);x.fill();});}'''),
 }
+
+PAGES['ascii-christmas'] = dict(
+  noun='ascii christmas tree', tagline='A 3D Christmas tree made of text that grows itself, spins, and lights up.', minutes=20, needs='laptop + Chrome · webcam for hands',
+  play_sub="it's already live, {n}. open it on your laptop and click once to turn the sound on.",
+  versions=[
+    dict(name='animation version', desc='the tree grows by itself in ~15 seconds: star, ornaments, fairy lights, presents, snow and a sleigh across the moon.',
+         how=['drag to spin the tree · click for sparkles','<kbd>R</kbd> replays · <kbd>J</kbd> sleigh · <kbd>O</kbd> ornament colours · <kbd>Space</kbd> snow · <kbd>S</kbd> picture'],
+         href='tree.html', link='open the animation'),
+    dict(name='hand gesture version ✋', desc='spin it with your own hands. needs a webcam, works best in Chrome. nothing is uploaded.',
+         how=['<b>swipe</b> to spin · <b>pinch</b> for sparkles','<b>open palm</b> (hold) for the sleigh · <b>fist</b> for a snowstorm'],
+         href='tree.html?hand', link='open the hand gesture version'),
+  ],
+  bugs=[
+    ('the tree looked flat, like a 2D drawing','render it as a real 3D object the donut.c way: points on the surface, rotate, project, z-buffer, and pick each character by brightness'),
+    ('the whole tree was a solid block of # and @','darken the underside of each branch layer and make the light less even, so it shows ridges and a shadow side'),
+    ('the star came out as a blob','build it from a proper 5-point star shape with a point-in-polygon test and tone down its glow'),
+    ('the sleigh flew off the top of the screen, then through the tree','leave room at the top and fly it from in front of the moon, above the tree top'),
+    ('the snowy ground stretched into flat lines','make the ground disc smaller and tilt the camera down about 15°'),
+    ('dragging spun the tree the opposite way','flip the sign so the front of the tree follows your finger (and your hand)'),
+  ],
+  draw=r"""(x,W,H,t)=>{
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#050816');g.addColorStop(1,'#1a2a5e');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const ch=H/34,cw=ch*.6,R=' .,-~:;=!*#$@';x.font=`500 ${ch}px "DM Mono",monospace`;x.textAlign='center';x.textBaseline='middle';
+ for(let i=0;i<40;i++){x.globalAlpha=.3+.3*Math.sin(t*1.5+i);x.fillStyle='#cfdaff';x.fillText(i%5?'.':'+',(i*97%100)/100*W,(i*53%60)/100*H);}
+ const cols=Math.ceil(W/cw),rows=Math.ceil(H/ch),Z=new Float32Array(cols*rows).fill(9),Lm=new Float32Array(cols*rows).fill(-1);
+ const a=t*.8,ca=Math.cos(a),sa=Math.sin(a),K=H*.62,cx=W/2,base=H*.86;
+ const T=[[0,.45,.46],[.3,.72,.34],[.6,1,.2]];
+ for(const[b,tp,Rr]of T)for(let i=0;i<40;i++)for(let j=0;j<70;j++){const u=i/40,h=b+u*(tp-b),th=j/70*6.283,lay=(u*3)%1,r=Rr*(1-u)*(.85+.15*lay)*(1+.07*Math.sin(9*th));
+  const X=Math.cos(th)*r,Zz=Math.sin(th)*r,x1=X*ca+Zz*sa,z1=-X*sa+Zz*ca,c=Math.round((cx+x1*K)/cw),rr=Math.round((base-h*K+z1*K*.2)/ch);if(c<0||rr<0||c>=cols||rr>=rows)continue;const id=rr*cols+c;if(z1>=Z[id])continue;
+  const nx=Math.cos(th),nz=Math.sin(th),nx1=nx*ca+nz*sa,nz1=-nx*sa+nz*ca;Z[id]=z1;Lm[id]=Math.max(0,(-nx1*.5-nz1*.7+.4)/1.3)*(.5+.5*(1-lay));}
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const l=Lm[r*cols+c];if(l<0)continue;x.globalAlpha=1;x.fillStyle=`rgb(${16+124*l|0},${70+185*l|0},${40+140*l|0})`;x.fillText(R[Math.max(1,Math.min(12,Math.round(l*12)))],(c+.5)*cw,(r+.5)*ch);}
+ for(let k=0;k<26;k++){const h=.05+(k*37%90)/100,th=k*2.4+a,r=.46*(1-h)*1.02,X=Math.cos(th)*r,Zz=Math.sin(th)*r;if(Zz*ca-X*sa>0)continue;const px=cx+(X*ca+Zz*sa)*K,py=base-h*K;x.globalAlpha=.85+.15*Math.sin(t*4+k);x.fillStyle=['#ff3b3b','#ffd23f','#4fb3ff','#ff5c8a'][k%4];x.font=`700 ${ch*1.3}px "DM Mono",monospace`;x.fillText('o',px,py);}
+ x.globalAlpha=1;x.font=`700 ${ch*2.6}px "DM Mono",monospace`;x.fillStyle='#ffd86b';x.save();x.translate(cx,base-K*1.04);x.scale(Math.max(.25,Math.abs(Math.cos(t*1.1))),1);x.fillText('*',0,0);x.restore();
+ const p=(t%9)/9;if(p<.6){const q=p/.6;x.font=`500 ${ch}px "DM Mono",monospace`;x.fillStyle='#f4e7c8';x.fillText('(")__ (")__ \\__/',W+60-q*(W+200),H*.12+Math.pow(1-q,2)*H*.12);}
+}"""
+)

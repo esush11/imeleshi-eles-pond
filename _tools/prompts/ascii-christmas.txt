@@ -1,0 +1,29 @@
+Build a single standalone HTML file called ascii-christmas.html that I open in Chrome on my laptop: a detailed 3D ASCII Christmas tree that spins, drawn on one canvas entirely with monospace characters (DM Mono), in the style of the classic spinning ASCII donut (donut.c).
+
+3D TREE (the main thing)
+- Build the tree from 4 stacked, overlapping cone tiers (tallest and widest at the bottom). Each tier has 4 flared branch layers (the radius flares out at the bottom of each layer) and wavy, ruffled edges (radius wobbles with sin(9θ) and sin(23θ)) so it looks like real branches.
+- Sample tens of thousands of points over the tree surface with normals, plus a trunk cylinder, 5 present boxes around the base (with gold ribbon crosses) and a faint snowy ground disc.
+- Every frame: rotate everything around the vertical axis (slow auto-spin; I can drag to spin it with inertia, the front of the tree follows my finger), tilt the camera down ~15°, perspective-project into a character grid (cells about 1/78 of the screen height), keep the closest point per cell (z-buffer), light it with a directional light from the upper front-left, and pick each character from the brightness ramp " .,-~:;=!*#$@". Darken the underside of each branch layer so the layers read as ridges. Colour by brightness: deep green to mint for the tree, brown trunk, coloured presents, pale blue snow.
+- Ornaments (~50 o @ O 0 in red, gold, orange, pink and blue) and two spiral garlands of fairy lights wrapping the tree are 3D points on the surface: only draw them when they're in front (z-buffer test), with a glow, bigger when closer. The lights chase upwards.
+- Star on top: a big 5-point star rasterised from characters (# in the centre, then *, then +) using a proper point-in-polygon test, facing the camera and spinning on its own axis (squash its width with cos), with a soft glow and slowly rotating rays.
+
+SCENE
+Night sky (navy gradient, twinkling . + * stars, the odd shooting star), a big shaded ASCII moon top-right, falling snow, and "merry christmas" in a gold italic serif (Cormorant Garamond) with a small mono line underneath.
+
+ANIMATION (~15 seconds, R replays)
+1. Ground and trunk appear, then the tree grows from the bottom up while spinning, with a scrambling front edge and a soft typewriter tick.
+2. The star drops on with a little bounce and a shimmer of bells.
+3. Ornaments pop on from the bottom up with little bell notes; the garlands start chasing; presents pop in; snow starts; the message fades in.
+4. Santa's sleigh (ASCII reindeer pulling a red sleigh) flies from in front of the moon across the top of the sky, above the tree, trailing gold sparkles, with sleigh bells. It comes back every ~25 seconds, or with J / the sleigh button.
+5. A music box plays Jingle Bells (public domain).
+
+HAND GESTURE MODE
+A "light it with my hands" button on the start screen (and a "hand play" pill, and ?hand in the URL) turns on the webcam and MediaPipe Hand Landmarker (tasks-vision 0.10.14 from jsDelivr, GPU with CPU fallback, 1 hand, checked about 20 times a second):
+- Swipe: the palm's sideways speed spins the tree in the same direction, then it eases back to the slow auto-spin.
+- Pinch thumb and index: a burst of coloured sparkles at my fingertip with a bell.
+- Open palm held for ~1 second: the sleigh flies (8 second cooldown).
+- Fist: a snowstorm while I hold it.
+- A glowing star follows my index fingertip, a small mirrored webcam preview with gold hand dots sits top-right, and a status pill says what it sees ("show me your hand", "spinning →", "sparkles", "hold for the sleigh…", "snowstorm").
+
+INTERACTION + CONTROLS
+Start screen with a small ASCII tree, "light the tree" and "light it with my hands" (clicking turns the sound on). Click for a burst of sparkles. Space = heavier snow, O = ornament colours (classic, icy, pink), S = save PNG, F = full screen, H = hide. Frosted pills along the bottom: replay, sound, sleigh, snow, ornaments, message (edit the two lines of text), camera icon, record clip (.mp4 if supported, otherwise .webm, with the sound), full screen, hand play, hide. Keep it fast: precompute the points once, draw characters grouped by colour, glows from pre-rendered radial-gradient sprites, cap device pixel ratio at 2, no CSS blur filters. Respect prefers-reduced-motion. Nothing is uploaded.

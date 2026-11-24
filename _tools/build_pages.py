@@ -187,4 +187,27 @@ footer{color:#888}''',
  'ilysm-touch.txt', 'https://www.instagram.com/reel/DgE0AfrpqqM/')
 shutil.copy(f'{B}/i-love-you-so-much.html', f'{HUB}/ilysm-touch/i-love-you-so-much.html')
 shutil.copy(f'{B}/dont-forget-to-love-yourself.html', f'{HUB}/ilysm-touch/dont-forget-to-love-yourself.html')
+
+page('ascii-christmas', 'ascii christmas',
+ 'family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500;1,600',
+ '''/* VOICE cosy, nerdy-festive · IDEA a tree made of text · PICTURE gold characters on a navy night · TYPE Cormorant italic + DM Mono */
+body{background:radial-gradient(80% 60% at 50% 0%,#16224f,#050816 70%) fixed;color:#e9edff;font:15px/1.6 "DM Mono",ui-monospace,monospace}
+.back{color:#aeb9e8}
+h1{font:italic 600 clamp(46px,9vw,80px)/1 "Cormorant Garamond",serif;color:#ffe08a;margin:0 0 10px;text-shadow:0 0 30px rgba(255,200,90,.45)}
+.hero pre.mini{font:500 13px/1.05 "DM Mono",monospace;color:#ffd86b;margin:0 0 6px;text-shadow:0 0 14px rgba(255,210,110,.6)}
+.hero p{color:#c7d0f5}
+.btn{background:#ffd86b;color:#0b1330;font:500 14px "DM Mono",monospace}
+.btn:hover{background:#ffe7a6}
+.btn.alt{background:transparent;color:#ffe08a;border:1px solid rgba(255,216,107,.6)}
+.btn.alt:hover{background:rgba(255,216,107,.08)}
+.card{background:rgba(12,20,50,.78);border:1px solid rgba(200,215,255,.16)}
+.card h3{font:italic 600 26px/1.1 "Cormorant Garamond",serif;color:#ffe08a}
+kbd{background:rgba(255,255,255,.12)}
+pre#prompt{background:#070c22;color:#dfe6ff;border:1px solid rgba(200,215,255,.12)}
+footer{color:#8f9ac4}''',
+ '''    <pre class="mini" aria-hidden="true">   *\n  /o\\\n /*.@\\\n/o.*.o\\\n  |#|</pre>
+    <h1>ascii christmas</h1>
+    <p>A 3D Christmas tree made entirely of text. It grows itself, spins, lights up, and Santa flies across the moon. Spin it with your hands, too.</p>''',
+ [], '', 'ascii-christmas.txt', None)
+shutil.copy('/home/claude/vibe/ascii-christmas.html', f'{HUB}/ascii-christmas/tree.html')
 print('built')

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ascii christmas</title>
+<meta name="description" content="A 3D Christmas tree made of text that grows itself, spins, and lights up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{overflow-x:clip}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,70px) 20px 60px;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px;text-decoration:none;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:34px}
+.hero p{max-width:540px;margin:0 auto 24px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+.card{border-radius:20px;padding:22px 22px 18px;margin-top:20px}
+.card h3{margin:0 0 10px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:5px 0}
+kbd{font:500 12px ui-monospace,monospace;border-radius:6px;padding:1px 6px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ph h3{margin:0}
+#copy{min-height:44px;padding:0 18px}
+pre{margin:0;max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;border-radius:12px;padding:16px;font:13px/1.6 ui-monospace,"DM Mono",monospace}
+.steps{margin:0 0 12px;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+.btn:focus-visible,.back:focus-visible,#copy:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.preview{display:block;position:relative;aspect-ratio:16/10;width:100%;max-width:580px;margin:0 auto 22px;border-radius:18px;overflow:hidden;text-decoration:none;box-shadow:0 24px 60px rgba(0,0,0,.35);transition:transform .25s}
+.preview{outline:1px solid rgba(127,127,127,.25);outline-offset:-1px}
+.preview:hover{transform:translateY(-3px)}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .tag{position:absolute;right:12px;bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lead{max-width:540px;margin:0 auto 22px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:44px 0 4px;text-align:center}
+.sec-title{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.sec-title .n{font:600 14px ui-monospace,"DM Mono",monospace;opacity:.6}
+.sec-title h3{margin:0}
+.sub{margin:0 0 14px;font-size:14px;opacity:.85}
+.ver{border-top:1px solid rgba(127,127,127,.25);padding:16px 0 4px}
+.ver h4{margin:0 0 4px;font-size:16px}
+.ver p{margin:0 0 10px;font-size:14px;opacity:.9}
+.ver ul{margin:0 0 12px;padding-left:18px;font-size:14px}
+.ver li{margin:3px 0}
+.go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:inherit}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(127,127,127,.4)}
+.acts.left{justify-content:flex-start;margin:4px 0 16px}
+.bugs{margin:0;padding-left:0;list-style:none}
+.bugs li{padding:10px 0;border-top:1px solid rgba(127,127,127,.22);font-size:14px}
+.bugs b{display:block;margin-bottom:2px}
+.bugs span{opacity:.85}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.preview{transition:none}}
+
+/* VOICE cosy, nerdy-festive · IDEA a tree made of text · PICTURE gold characters on a navy night · TYPE Cormorant italic + DM Mono */
+body{background:radial-gradient(80% 60% at 50% 0%,#16224f,#050816 70%) fixed;color:#e9edff;font:15px/1.6 "DM Mono",ui-monospace,monospace}
+.back{color:#aeb9e8}
+h1{font:italic 600 clamp(46px,9vw,80px)/1 "Cormorant Garamond",serif;color:#ffe08a;margin:0 0 10px;text-shadow:0 0 30px rgba(255,200,90,.45)}
+.hero pre.mini{font:500 13px/1.05 "DM Mono",monospace;color:#ffd86b;margin:0 0 6px;text-shadow:0 0 14px rgba(255,210,110,.6)}
+.hero p{color:#c7d0f5}
+.btn{background:#ffd86b;color:#0b1330;font:500 14px "DM Mono",monospace}
+.btn:hover{background:#ffe7a6}
+.btn.alt{background:transparent;color:#ffe08a;border:1px solid rgba(255,216,107,.6)}
+.btn.alt:hover{background:rgba(255,216,107,.08)}
+.card{background:rgba(12,20,50,.78);border:1px solid rgba(200,215,255,.16)}
+.card h3{font:italic 600 26px/1.1 "Cormorant Garamond",serif;color:#ffe08a}
+kbd{background:rgba(255,255,255,.12)}
+pre#prompt{background:#070c22;color:#dfe6ff;border:1px solid rgba(200,215,255,.12)}
+footer{color:#8f9ac4}
+</style>
+</head>
+<body>
+
+<main>
+  <a class="back" href="../">← back to the pond</a>
+  <section class="hero">
+    <pre class="mini" aria-hidden="true">   *
+  /o\
+ /*.@\
+/o.*.o\
+  |#|</pre>
+    <h1>ascii christmas</h1>
+    <p>A 3D Christmas tree made entirely of text. It grows itself, spins, lights up, and Santa flies across the moon. Spin it with your hands, too.</p>
+    <a class="preview" href="tree.html" aria-label="open ascii christmas tree"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
+    <div class="acts"><a class="btn" href="tree.html">open it now →</a><a class="btn alt" href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">follow on instagram ↗</a></div>
+  </section>
+
+  <p class="kicker">two ways to try it</p>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">01</span><h3>play with it now</h3></div>
+    <p class="sub">it's already live, 2 versions. open it on your laptop and click once to turn the sound on.</p>
+    <div class="ver"><h4>animation version</h4><p>the tree grows by itself in ~15 seconds: star, ornaments, fairy lights, presents, snow and a sleigh across the moon.</p><ul><li>drag to spin the tree · click for sparkles</li><li><kbd>R</kbd> replays · <kbd>J</kbd> sleigh · <kbd>O</kbd> ornament colours · <kbd>Space</kbd> snow · <kbd>S</kbd> picture</li></ul><a class="go" href="tree.html">open the animation ↗</a></div><div class="ver"><h4>hand gesture version ✋</h4><p>spin it with your own hands. needs a webcam, works best in Chrome. nothing is uploaded.</p><ul><li><b>swipe</b> to spin · <b>pinch</b> for sparkles</li><li><b>open palm</b> (hold) for the sleigh · <b>fist</b> for a snowstorm</li></ul><a class="go" href="tree.html?hand">open the hand gesture version ↗</a></div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">02</span><h3>build your own ascii christmas tree</h3></div>
+    <p class="sub">copy my prompt into Claude or ChatGPT and ask it to build you a single HTML file. you might need to tweak a few things depending on your setup. i wrote down the <a href="#bugs" style="color:inherit">bugs i ran into</a> (they're baked into the prompt too), so you can skip some of the trial and error.</p>
+    <div class="meta"><span class="pill">⏱ takes ~20 minutes</span><span class="pill">single HTML file</span><span class="pill">laptop + Chrome · webcam for hands</span></div>
+    <div class="acts left"><button class="btn" id="copy">copy prompt</button><a class="btn alt" href="tree.html">see mine first</a></div>
+    <pre id="prompt">Build a single standalone HTML file called ascii-christmas.html that I open in Chrome on my laptop: a detailed 3D ASCII Christmas tree that spins, drawn on one canvas entirely with monospace characters (DM Mono), in the style of the classic spinning ASCII donut (donut.c).
+
+3D TREE (the main thing)
+- Build the tree from 4 stacked, overlapping cone tiers (tallest and widest at the bottom). Each tier has 4 flared branch layers (the radius flares out at the bottom of each layer) and wavy, ruffled edges (radius wobbles with sin(9θ) and sin(23θ)) so it looks like real branches.
+- Sample tens of thousands of points over the tree surface with normals, plus a trunk cylinder, 5 present boxes around the base (with gold ribbon crosses) and a faint snowy ground disc.
+- Every frame: rotate everything around the vertical axis (slow auto-spin; I can drag to spin it with inertia, the front of the tree follows my finger), tilt the camera down ~15°, perspective-project into a character grid (cells about 1/78 of the screen height), keep the closest point per cell (z-buffer), light it with a directional light from the upper front-left, and pick each character from the brightness ramp &quot; .,-~:;=!*#$@&quot;. Darken the underside of each branch layer so the layers read as ridges. Colour by brightness: deep green to mint for the tree, brown trunk, coloured presents, pale blue snow.
+- Ornaments (~50 o @ O 0 in red, gold, orange, pink and blue) and two spiral garlands of fairy lights wrapping the tree are 3D points on the surface: only draw them when they&#x27;re in front (z-buffer test), with a glow, bigger when closer. The lights chase upwards.
+- Star on top: a big 5-point star rasterised from characters (# in the centre, then *, then +) using a proper point-in-polygon test, facing the camera and spinning on its own axis (squash its width with cos), with a soft glow and slowly rotating rays.
+
+SCENE
+Night sky (navy gradient, twinkling . + * stars, the odd shooting star), a big shaded ASCII moon top-right, falling snow, and &quot;merry christmas&quot; in a gold italic serif (Cormorant Garamond) with a small mono line underneath.
+
+ANIMATION (~15 seconds, R replays)
+1. Ground and trunk appear, then the tree grows from the bottom up while spinning, with a scrambling front edge and a soft typewriter tick.
+2. The star drops on with a little bounce and a shimmer of bells.
+3. Ornaments pop on from the bottom up with little bell notes; the garlands start chasing; presents pop in; snow starts; the message fades in.
+4. Santa&#x27;s sleigh (ASCII reindeer pulling a red sleigh) flies from in front of the moon across the top of the sky, above the tree, trailing gold sparkles, with sleigh bells. It comes back every ~25 seconds, or with J / the sleigh button.
+5. A music box plays Jingle Bells (public domain).
+
+HAND GESTURE MODE
+A &quot;light it with my hands&quot; button on the start screen (and a &quot;hand play&quot; pill, and ?hand in the URL) turns on the webcam and MediaPipe Hand Landmarker (tasks-vision 0.10.14 from jsDelivr, GPU with CPU fallback, 1 hand, checked about 20 times a second):
+- Swipe: the palm&#x27;s sideways speed spins the tree in the same direction, then it eases back to the slow auto-spin.
+- Pinch thumb and index: a burst of coloured sparkles at my fingertip with a bell.
+- Open palm held for ~1 second: the sleigh flies (8 second cooldown).
+- Fist: a snowstorm while I hold it.
+- A glowing star follows my index fingertip, a small mirrored webcam preview with gold hand dots sits top-right, and a status pill says what it sees (&quot;show me your hand&quot;, &quot;spinning →&quot;, &quot;sparkles&quot;, &quot;hold for the sleigh…&quot;, &quot;snowstorm&quot;).
+
+INTERACTION + CONTROLS
+Start screen with a small ASCII tree, &quot;light the tree&quot; and &quot;light it with my hands&quot; (clicking turns the sound on). Click for a burst of sparkles. Space = heavier snow, O = ornament colours (classic, icy, pink), S = save PNG, F = full screen, H = hide. Frosted pills along the bottom: replay, sound, sleigh, snow, ornaments, message (edit the two lines of text), camera icon, record clip (.mp4 if supported, otherwise .webm, with the sound), full screen, hand play, hide. Keep it fast: precompute the points once, draw characters grouped by colour, glows from pre-rendered radial-gradient sprites, cap device pixel ratio at 2, no CSS blur filters. Respect prefers-reduced-motion. Nothing is uploaded.
+
+BUGS I RAN INTO (handle these from the start):
+- the tree looked flat, like a 2D drawing → render it as a real 3D object the donut.c way: points on the surface, rotate, project, z-buffer, and pick each character by brightness
+- the whole tree was a solid block of # and @ → darken the underside of each branch layer and make the light less even, so it shows ridges and a shadow side
+- the star came out as a blob → build it from a proper 5-point star shape with a point-in-polygon test and tone down its glow
+- the sleigh flew off the top of the screen, then through the tree → leave room at the top and fly it from in front of the moon, above the tree top
+- the snowy ground stretched into flat lines → make the ground disc smaller and tilt the camera down about 15°
+- dragging spun the tree the opposite way → flip the sign so the front of the tree follows your finger (and your hand)</pre>
+    <p class="sub" style="margin-top:14px">have fun making yours :) save the file, open it in Chrome, and tag me if you post it.</p>
+  </section>
+
+  <section class="card" id="bugs">
+    <div class="sec-title"><span class="n">✎</span><h3>bugs i ran into</h3></div>
+    <p class="sub">if yours does something weird, it's probably one of these. paste the fix back into the chat.</p>
+    <ul class="bugs"><li><b>the tree looked flat, like a 2D drawing</b><span>fix: render it as a real 3D object the donut.c way: points on the surface, rotate, project, z-buffer, and pick each character by brightness</span></li><li><b>the whole tree was a solid block of # and @</b><span>fix: darken the underside of each branch layer and make the light less even, so it shows ridges and a shadow side</span></li><li><b>the star came out as a blob</b><span>fix: build it from a proper 5-point star shape with a point-in-polygon test and tone down its glow</span></li><li><b>the sleigh flew off the top of the screen, then through the tree</b><span>fix: leave room at the top and fly it from in front of the moon, above the tree top</span></li><li><b>the snowy ground stretched into flat lines</b><span>fix: make the ground disc smaller and tilt the camera down about 15°</span></li><li><b>dragging spun the tree the opposite way</b><span>fix: flip the sign so the front of the tree follows your finger (and your hand)</span></li></ul>
+  </section>
+
+  <footer>made by <a href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">@imeleshi</a> with Claude · <a href="../">more little things in the pond</a></footer>
+</main>
+<script>
+{
+const b=document.getElementById('copy');
+b.addEventListener('click',async()=>{
+  const t=document.getElementById('prompt').textContent;
+  try{await navigator.clipboard.writeText(t);b.textContent='copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected — press ⌘C';}
+  setTimeout(()=>b.textContent='copy prompt',2200);
+});
+}
+</script>
+<script>
+{
+const cv=document.getElementById('pv');if(cv){
+const x=cv.getContext('2d');let W,H,t0=performance.now();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=r.width*d;H=cv.height=r.height*d;}
+addEventListener('resize',size);size();
+const draw=(x,W,H,t)=>{
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#050816');g.addColorStop(1,'#1a2a5e');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const ch=H/34,cw=ch*.6,R=' .,-~:;=!*#$@';x.font=`500 ${ch}px "DM Mono",monospace`;x.textAlign='center';x.textBaseline='middle';
+ for(let i=0;i<40;i++){x.globalAlpha=.3+.3*Math.sin(t*1.5+i);x.fillStyle='#cfdaff';x.fillText(i%5?'.':'+',(i*97%100)/100*W,(i*53%60)/100*H);}
+ const cols=Math.ceil(W/cw),rows=Math.ceil(H/ch),Z=new Float32Array(cols*rows).fill(9),Lm=new Float32Array(cols*rows).fill(-1);
+ const a=t*.8,ca=Math.cos(a),sa=Math.sin(a),K=H*.62,cx=W/2,base=H*.86;
+ const T=[[0,.45,.46],[.3,.72,.34],[.6,1,.2]];
+ for(const[b,tp,Rr]of T)for(let i=0;i<40;i++)for(let j=0;j<70;j++){const u=i/40,h=b+u*(tp-b),th=j/70*6.283,lay=(u*3)%1,r=Rr*(1-u)*(.85+.15*lay)*(1+.07*Math.sin(9*th));
+  const X=Math.cos(th)*r,Zz=Math.sin(th)*r,x1=X*ca+Zz*sa,z1=-X*sa+Zz*ca,c=Math.round((cx+x1*K)/cw),rr=Math.round((base-h*K+z1*K*.2)/ch);if(c<0||rr<0||c>=cols||rr>=rows)continue;const id=rr*cols+c;if(z1>=Z[id])continue;
+  const nx=Math.cos(th),nz=Math.sin(th),nx1=nx*ca+nz*sa,nz1=-nx*sa+nz*ca;Z[id]=z1;Lm[id]=Math.max(0,(-nx1*.5-nz1*.7+.4)/1.3)*(.5+.5*(1-lay));}
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const l=Lm[r*cols+c];if(l<0)continue;x.globalAlpha=1;x.fillStyle=`rgb(${16+124*l|0},${70+185*l|0},${40+140*l|0})`;x.fillText(R[Math.max(1,Math.min(12,Math.round(l*12)))],(c+.5)*cw,(r+.5)*ch);}
+ for(let k=0;k<26;k++){const h=.05+(k*37%90)/100,th=k*2.4+a,r=.46*(1-h)*1.02,X=Math.cos(th)*r,Zz=Math.sin(th)*r;if(Zz*ca-X*sa>0)continue;const px=cx+(X*ca+Zz*sa)*K,py=base-h*K;x.globalAlpha=.85+.15*Math.sin(t*4+k);x.fillStyle=['#ff3b3b','#ffd23f','#4fb3ff','#ff5c8a'][k%4];x.font=`700 ${ch*1.3}px "DM Mono",monospace`;x.fillText('o',px,py);}
+ x.globalAlpha=1;x.font=`700 ${ch*2.6}px "DM Mono",monospace`;x.fillStyle='#ffd86b';x.save();x.translate(cx,base-K*1.04);x.scale(Math.max(.25,Math.abs(Math.cos(t*1.1))),1);x.fillText('*',0,0);x.restore();
+ const p=(t%9)/9;if(p<.6){const q=p/.6;x.font=`500 ${ch}px "DM Mono",monospace`;x.fillStyle='#f4e7c8';x.fillText('(")__ (")__ \\__/',W+60-q*(W+200),H*.12+Math.pow(1-q,2)*H*.12);}
+};
+function loop(now){draw(x,W,H,Math.max(0,(now-t0)/1000));if(!reduce)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+}}
+</script>
+
+</body>
+</html>
