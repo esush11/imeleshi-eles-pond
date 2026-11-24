@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rainy window</title>
+<meta name="description" content="A fogged-up window on a rainy day. Blow to steam it up and write on the glass.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{overflow-x:clip}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,70px) 20px 60px;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px;text-decoration:none;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:34px}
+.hero p{max-width:540px;margin:0 auto 24px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+.card{border-radius:20px;padding:22px 22px 18px;margin-top:20px}
+.card h3{margin:0 0 10px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:5px 0}
+kbd{font:500 12px ui-monospace,monospace;border-radius:6px;padding:1px 6px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ph h3{margin:0}
+#copy{min-height:44px;padding:0 18px}
+pre{margin:0;max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;border-radius:12px;padding:16px;font:13px/1.6 ui-monospace,"DM Mono",monospace}
+.steps{margin:0 0 12px;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+.btn:focus-visible,.back:focus-visible,#copy:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.preview{display:block;position:relative;aspect-ratio:16/10;width:100%;max-width:580px;margin:0 auto 22px;border-radius:18px;overflow:hidden;text-decoration:none;box-shadow:0 24px 60px rgba(0,0,0,.35);transition:transform .25s}
+.preview{outline:1px solid rgba(127,127,127,.25);outline-offset:-1px}
+.preview:hover{transform:translateY(-3px)}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .tag{position:absolute;right:12px;bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lead{max-width:540px;margin:0 auto 22px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:44px 0 4px;text-align:center}
+.sec-title{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.sec-title .n{font:600 14px ui-monospace,"DM Mono",monospace;opacity:.6}
+.sec-title h3{margin:0}
+.sub{margin:0 0 14px;font-size:14px;opacity:.85}
+.ver{border-top:1px solid rgba(127,127,127,.25);padding:16px 0 4px}
+.ver h4{margin:0 0 4px;font-size:16px}
+.ver p{margin:0 0 10px;font-size:14px;opacity:.9}
+.ver ul{margin:0 0 12px;padding-left:18px;font-size:14px}
+.ver li{margin:3px 0}
+.go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:inherit}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(127,127,127,.4)}
+.acts.left{justify-content:flex-start;margin:4px 0 16px}
+.bugs{margin:0;padding-left:0;list-style:none}
+.bugs li{padding:10px 0;border-top:1px solid rgba(127,127,127,.22);font-size:14px}
+.bugs b{display:block;margin-bottom:2px}
+.bugs span{opacity:.85}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.preview{transition:none}}
+
+/* VOICE cosy rainy afternoon · IDEA a steamed-up window · PICTURE rain streaks over grey-blue glass
+   COLOUR rain grey-blue, frost white · TYPE Caveat + DM Sans · LAYOUT one centred column on frosted glass */
+body{background:radial-gradient(120% 90% at 50% 0%,#5f7384 0%,#33414d 55%,#1d2329 100%) fixed;color:#fff;font:16px/1.6 "DM Sans",system-ui,sans-serif}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.back{color:rgba(255,255,255,.8)}
+h1{font:700 clamp(72px,14vw,120px)/.9 "Caveat",cursive;margin:0 0 14px}
+.hero p{opacity:.88}
+.btn{background:#fff;color:#1d2329;font:500 16px "DM Sans",sans-serif}
+.btn:hover{background:#e8eef2}
+.btn.alt{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+.card h3{font:700 34px/1 "Caveat",cursive}
+.card ul{font-size:15px;opacity:.92}
+kbd{background:rgba(255,255,255,.2)}
+#copy{font-size:14px}
+pre{background:rgba(20,26,32,.55);color:#eef3f6}
+.steps{opacity:.8}
+footer{opacity:.7}
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<main>
+  <a class="back" href="../">← back to the pond</a>
+  <section class="hero">
+    <h1>rainy window</h1>
+    <p>A fogged-up window on a rainy day. Blow on your laptop to steam it up, then pinch your fingers and write on the glass with your fingertip.</p>
+    <a class="preview" href="window.html" aria-label="open rainy window"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
+    <div class="acts"><a class="btn" href="window.html">open it now →</a><a class="btn alt" href="https://www.instagram.com/reel/DgEJopfp2jn/" target="_blank" rel="noopener">watch the reel ↗</a></div>
+  </section>
+
+  <p class="kicker">two ways to try it</p>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">01</span><h3>play with it now</h3></div>
+    <p class="sub">it's already live. open it on your laptop in Chrome or Arc and allow the camera and microphone.</p>
+    <div class="ver"><h4>the window</h4><p>your webcam behind steamy glass, with real raindrops running down it.</p><ul><li><b>blow</b> at your laptop to fog the glass where your mouth is</li><li><b>pinch</b> your thumb and index finger to write · <b>make a fist</b> to wipe a big patch</li><li><kbd>C</kbd> fogs it all again · hold <kbd>Space</kbd> for more fog · <kbd>S</kbd> saves a picture · <kbd>H</kbd> hides the controls</li></ul><a class="go" href="window.html">open the rainy window ↗</a></div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">02</span><h3>build your own rainy window</h3></div>
+    <p class="sub">copy my prompt into Claude or ChatGPT and ask it to build you a single HTML file. you might need to tweak a few things depending on your setup. i wrote down the <a href="#bugs" style="color:inherit">bugs i ran into</a> (they're baked into the prompt too), so you can skip some of the trial and error.</p>
+    <div class="meta"><span class="pill">⏱ takes ~15 minutes</span><span class="pill">single HTML file</span><span class="pill">laptop + webcam + mic</span></div>
+    <div class="acts left"><button class="btn" id="copy">copy prompt</button><a class="btn alt" href="window.html">see mine first</a></div>
+    <pre id="prompt">Build a single standalone HTML file called rainy-window.html that I open in Chrome or Arc on my laptop: a cosy fogged-up window on a rainy afternoon, with my mirrored webcam behind the glass, full-bleed.
+
+Glass and fog: show the camera with a slight blue-grey tint. Over it, a frost layer (the camera blurred and brightened, with a pale white wash) masked by a fog canvas, so wherever there&#x27;s fog the glass looks steamed up. Start fully fogged. A &quot;refog&quot; pill cycles off / slow / fast (off by default); C fogs it all again; holding Space adds fog.
+
+Breath: listen on the mic (no echo cancellation or noise suppression), track the room&#x27;s noise floor, and when I blow, bloom soft fog patches just below my mouth, spreading sideways like real breath. Find my mouth with MediaPipe Face Detection, sending a frame every 5th turn alongside the hand tracker; if it fails, bloom from the centre. Show a small breath meter with a sensitivity slider, and a mic picker.
+
+Hands (MediaPipe Hands, one hand, loaded first, toast &quot;Hand tracking ready. Pinch to write.&quot;): pinch thumb and index to write. Measure the pinch in 3D relative to palm size, with a &quot;pinch&quot; looseness slider and a dot that lights up. Each stroke wipes a crisp, almost fully clear line (smoothed curves), with a little glowing star following my fingers. Make a fist to wipe a big patch (1.6x hand width) like a sleeve, shown as a dotted circle. Only count a fist when all four fingertips are closer to the wrist than their knuckles for 2 frames, so a pinch is never read as a fist. I can also write by dragging with the mouse or a finger. Brush size slider.
+
+Raindrops: realistic lenses. Each drop shows a shrunken, upside-down, slightly brightened view of the camera, with a dark rim, a bright caustic at the bottom and a small glint on top. Fine mist, many small static drops, and bigger drops that run down in stop-start wobbly paths, clear trails in the fog, leave tiny droplets behind and swallow the static drops they hit. Soft generated rain sound with a &quot;rain: on/off&quot; pill.
+
+UI: frosted pills (brush, breath, pinch bottom-left; mic, reset writing, tracking dots, refog, rain, full screen, hide, and a camera shutter that saves a PNG bottom-right). &quot;Tracking dots&quot; shows the pinch points with their value and a &quot;mouth&quot; circle. Hint pill at the top that fades after 9 seconds. Start screen: &quot;rainy window&quot; in Caveat over a rainy gradient, &quot;open the window&quot; button that goes full screen straight from the click. F toggles full screen, H hides controls (two-finger tap brings them back), S saves a picture, Escape stops. If a phone camera like Camo or Continuity Camera is connected, use it. Fonts: Caveat + DM Sans. Nothing leaves my computer.
+
+BUGS I RAN INTO (handle these from the start):
+- blowing didn&#x27;t fog anything because the mic cleaned my breath out → turn off echo cancellation and noise suppression on the mic and track the room&#x27;s noise floor
+- a pinch sometimes counted as a fist and wiped a huge patch → only count a fist when all four fingertips are closer to the wrist than their knuckles for 2 frames in a row
+- the writing was backwards → mirror the webcam so it moves like a real mirror
+- full screen wouldn&#x27;t open → ask for full screen straight from the button click, not after the camera loads
+- camera and mic were blocked in Claude&#x27;s preview → download the HTML file and open it in Chrome or Arc</pre>
+    <p class="sub" style="margin-top:14px">have fun making yours :) save the file, open it in Chrome, and tag me if you post it.</p>
+  </section>
+
+  <section class="card" id="bugs">
+    <div class="sec-title"><span class="n">✎</span><h3>bugs i ran into</h3></div>
+    <p class="sub">if yours does something weird, it's probably one of these. paste the fix back into the chat.</p>
+    <ul class="bugs"><li><b>blowing didn't fog anything because the mic cleaned my breath out</b><span>fix: turn off echo cancellation and noise suppression on the mic and track the room's noise floor</span></li><li><b>a pinch sometimes counted as a fist and wiped a huge patch</b><span>fix: only count a fist when all four fingertips are closer to the wrist than their knuckles for 2 frames in a row</span></li><li><b>the writing was backwards</b><span>fix: mirror the webcam so it moves like a real mirror</span></li><li><b>full screen wouldn't open</b><span>fix: ask for full screen straight from the button click, not after the camera loads</span></li><li><b>camera and mic were blocked in Claude's preview</b><span>fix: download the HTML file and open it in Chrome or Arc</span></li></ul>
+  </section>
+
+  <footer>made by <a href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">@imeleshi</a> with Claude · <a href="../">more little things in the pond</a></footer>
+</main>
+<script>
+{
+const b=document.getElementById('copy');
+b.addEventListener('click',async()=>{
+  const t=document.getElementById('prompt').textContent;
+  try{await navigator.clipboard.writeText(t);b.textContent='copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected — press ⌘C';}
+  setTimeout(()=>b.textContent='copy prompt',2200);
+});
+}
+</script>
+<script>
+{
+const cv=document.getElementById('pv');if(cv){
+const x=cv.getContext('2d');let W,H,t0=performance.now();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=r.width*d;H=cv.height=r.height*d;}
+addEventListener('resize',size);size();
+const draw=(x,W,H,t)=>{
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#6d8293');g.addColorStop(1,'#2b3640');x.fillStyle=g;x.fillRect(0,0,W,H);
+ [[.25,.35,'rgba(255,200,120,.5)'],[.72,.3,'rgba(255,230,180,.35)'],[.55,.7,'rgba(160,190,220,.4)']].forEach(([a,b,c])=>{const r=x.createRadialGradient(W*a,H*b,0,W*a,H*b,W*.25);r.addColorStop(0,c);r.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=r;x.fillRect(0,0,W,H);});
+ const cyc=9,k=t%cyc;
+ x.save();x.fillStyle=`rgba(225,232,238,.62)`;x.fillRect(0,0,W,H);
+ const S=[[[.0,0],[.0,1]],[[.0,.55],[.12,.42],[.28,.5],[.3,1]],[[.48,.42],[.48,1]],[[.48,.2],[.485,.22]],[[.78,.5],[.7,.35],[.82,.3],[.9,.45],[.98,.3],[1.1,.35],[1.02,.55],[.9,.85],[.78,.5]]];
+ const ox=W*.3,oy=H*.3,sc=H*.38;let total=0;S.forEach(s=>total+=s.length-1);const prog=Math.min(k/4.5,1)*total;let done=0,tip=null;
+ x.globalCompositeOperation='destination-out';x.lineCap='round';x.lineJoin='round';x.lineWidth=W*.022;x.strokeStyle='#000';
+ for(const s of S){x.beginPath();x.moveTo(ox+s[0][0]*sc,oy+s[0][1]*sc);for(let i=1;i<s.length;i++){const f=Math.min(Math.max(prog-done,0),1);if(f<=0)break;const a=s[i-1],b=s[i],px=a[0]+(b[0]-a[0])*f,py=a[1]+(b[1]-a[1])*f;x.lineTo(ox+px*sc,oy+py*sc);tip=[ox+px*sc,oy+py*sc];done++;if(f<1)break;}x.stroke();if(prog-done<0)break;}
+ const fade=k>7?(k-7)/2:0;x.globalCompositeOperation='source-over';if(fade>0){x.fillStyle=`rgba(225,232,238,${.62*fade})`;}
+ x.restore();if(fade>0){x.fillStyle=`rgba(225,232,238,${.6*fade})`;x.fillRect(0,0,W,H);}
+ if(tip&&k<4.6){x.fillStyle='rgba(255,250,220,.9)';x.shadowColor='#fff3b0';x.shadowBlur=W*.02;x.beginPath();x.arc(tip[0],tip[1],W*.008,0,6.28);x.fill();x.shadowBlur=0;}
+ for(let i=0;i<40;i++){const bx=(i*61%100)/100*W,sp=i%5===0?1:0,by=((i*37%100)/100*H+(sp?t*H*.12:0))%H,r=W*(.003+(i%4)*.0025);
+  x.fillStyle='rgba(40,55,70,.35)';x.beginPath();x.ellipse(bx,by,r,r*1.2,0,0,6.28);x.fill();x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.arc(bx-r*.3,by-r*.4,r*.35,0,6.28);x.fill();}};
+function loop(now){draw(x,W,H,Math.max(0,(now-t0)/1000));if(!reduce)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+}}
+</script>
+<script>
+{
+const c=document.getElementById('rain'),x=c.getContext('2d');let W,H,drops=[];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){W=c.width=innerWidth;H=c.height=innerHeight;drops=Array.from({length:Math.round(W*H/9000)},()=>({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*3,v:0,s:Math.random()*3}));}
+function f(){x.clearRect(0,0,W,H);
+  for(const d of drops){
+    if(!reduce){if(d.s>0)d.s-=0.016;else{d.v=Math.min(d.v+0.08,2+d.r);d.y+=d.v;if(Math.random()<0.01){d.s=Math.random();d.v=0;}}if(d.y>H+10){d.y=-10;d.x=Math.random()*W;}}
+    x.fillStyle='rgba(255,255,255,0.18)';x.beginPath();x.ellipse(d.x,d.y,d.r*0.85,d.r*1.15,0,0,6.283);x.fill();
+    x.fillStyle='rgba(255,255,255,0.55)';x.beginPath();x.arc(d.x-d.r*0.3,d.y-d.r*0.4,d.r*0.25,0,6.283);x.fill();
+  }
+  requestAnimationFrame(f);}
+addEventListener('resize',size);size();f();
+}
+</script>
+</body>
+</html>

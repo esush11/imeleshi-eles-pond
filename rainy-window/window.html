@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Rainy Window</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: cosy, tender, a rainy afternoon
+   IDEA: a fogged-up window on a rainy day with a note waiting on the other side
+   PICTURE: your mirrored camera behind frosted glass, raindrops running down it
+   COLOUR and TYPE: rain grey-blue, frost white, a warm glow for the note; Caveat + DM Sans
+   LAYOUT: full-bleed glass, brush pill bottom-left, small frosted pills bottom-right */
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;overflow:hidden;background:#1d2329;color:#fff;font:15px/1.5 "DM Sans",system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+#cam{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
+#view{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.pill{position:fixed;display:flex;align-items:center;gap:10px;padding:0 16px;min-height:44px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border:1px solid rgba(255,255,255,.38);color:#fff;font:500 14px "DM Sans",sans-serif;transition:opacity .4s}
+.brush{left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom))}
+.brush input,.pinchp input{accent-color:#fff;width:120px}
+.pinchp{left:max(18px,env(safe-area-inset-left));bottom:calc(max(18px,env(safe-area-inset-bottom)) + 54px)}
+.breathp{left:max(18px,env(safe-area-inset-left));bottom:calc(max(18px,env(safe-area-inset-bottom)) + 108px)}
+#breathdot{width:60px;height:6px;border-radius:6px;background:rgba(255,255,255,.2);position:relative;overflow:hidden;flex:none}#breathdot i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.6);border-radius:6px}#breathdot i.on{background:#fff;box-shadow:0 0 8px #fff}#breathdot b{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:.7}
+.breathp input{accent-color:#fff;width:80px}
+#pinchdot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .1s}
+#pinchdot.on{background:#fff;box-shadow:0 0 10px #fff}#pinchdot.near{background:rgba(255,255,255,.6)}
+.right{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 230px);transition:opacity .4s}
+.right .pill{position:static}.right button{cursor:pointer}
+.right button:hover{background:rgba(255,255,255,.28)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#shutter{width:44px;padding:0;justify-content:center}
+#shutter svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.8}
+#hint{position:fixed;left:50%;top:max(18px,env(safe-area-inset-top));transform:translateX(-50%);white-space:nowrap;max-width:calc(100vw - 36px);overflow:hidden;text-overflow:ellipsis;transition:opacity 1s}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);padding:10px 16px;border-radius:14px;background:rgba(20,26,32,.85);display:none;max-width:calc(100vw - 36px);text-align:center}
+body.clean .pill,body.clean .right{opacity:0;pointer-events:none}
+#start{position:fixed;inset:0;display:grid;place-items:center;padding:24px;z-index:5}
+#start{background:radial-gradient(120% 90% at 50% 0%,#5f7384 0%,#33414d 55%,#1d2329 100%)}
+#start::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(105deg,transparent 0 22px,rgba(255,255,255,.05) 22px 23px);pointer-events:none}
+.panel{position:relative;width:min(460px,100%);text-align:center}
+.panel h1{font:700 clamp(64px,13vw,104px)/.9 "Caveat",cursive;margin:0 0 10px}
+.panel p{margin:0 0 18px;opacity:.85}
+label.l{display:block;text-align:left;font-size:13px;opacity:.8;margin:0 0 6px}
+textarea{width:100%;min-height:84px;resize:vertical;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:italic 500 24px/1.25 "Cormorant Garamond",Georgia,serif}
+.go{margin-top:16px;min-height:52px;padding:0 30px;border-radius:999px;border:0;background:#fff;color:#1d2329;font:500 16px "DM Sans",sans-serif;cursor:pointer}
+.go:disabled{opacity:.6}
+.small{display:block;margin-top:14px;font-size:13px;opacity:.75}
+#err{margin-top:12px;color:#ffd2d2;min-height:1em;font-size:14px}
+.ed{background:rgba(29,35,41,.92);padding:22px;border-radius:22px;border:1px solid rgba(255,255,255,.2)}
+@media(max-width:640px){.right{max-width:calc(100vw - 36px);bottom:130px}.brush input,.pinchp input{width:90px}}
+@media(prefers-reduced-motion:reduce){.pill,.right,#hint{transition:none}}
+</style>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="view"></canvas>
+
+<div class="pill" id="hint">blow to fog it up · pinch to write · make a fist and swipe to wipe · F for full screen · H hides controls</div>
+<div id="toast"></div>
+
+<label class="pill brush">brush <input id="brush" type="range" min="7" max="38" value="15" aria-label="Brush size"></label>
+<label class="pill breathp">breath <span id="breathdot"><i id="breathlv"></i><b></b></span><input id="bsens" type="range" min="0.4" max="4" step="0.05" value="1" aria-label="Breath sensitivity"></label>
+<label class="pill pinchp">pinch <input id="pinch" type="range" min="0.7" max="1.8" step="0.05" value="1.25" aria-label="Pinch looseness"><span id="pinchdot"></span></label>
+<div class="right" id="right">
+  <label class="pill">mic <select id="micsel" aria-label="Microphone" style="background:transparent;color:#fff;border:0;font:14px DM Sans,sans-serif;max-width:140px;min-height:40px"></select></label>
+  <button class="pill" id="resetw">reset writing</button>
+  <button class="pill" id="dots">tracking dots: off</button>
+  <button class="pill" id="refog">refog: off</button>
+  <button class="pill" id="rain">rain: on</button>
+  <button class="pill" id="full">full screen</button>
+  <button class="pill" id="hide">hide</button>
+  <button class="pill" id="shutter" aria-label="Save picture"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg></button>
+</div>
+
+<div id="start">
+  <div class="panel">
+    <h1>rainy window</h1>
+    <p>A rainy window. Blow on your laptop to fog it up, then pinch your fingers and wipe the glass with your fingertip.</p>
+    <button class="go" id="go">open the window</button>
+    <div id="err"></div>
+    <span class="small">Uses your camera and microphone. Everything runs in your browser. No video or audio ever leaves your computer.</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/face_detection.js" crossorigin="anonymous"></script>
+<script>
+'use strict';
+{
+const $=id=>document.getElementById(id);
+const TAU=Math.PI*2;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const view=$('view'),ctx=view.getContext('2d'),video=$('cam');
+const fog=document.createElement('canvas'),fctx=fog.getContext('2d');
+const frost=document.createElement('canvas'),rctx=frost.getContext('2d');
+const sprite=document.createElement('canvas');
+
+let W=0,H=0,DPR=1,FS=1,running=false,last=performance.now();
+const cover={x:0,y:0,w:1,h:1};
+let brush=15;
+const REFOG=[['off',0],['slow',0.0012],['fast',0.004]];let refogI=0;
+let spaceHeld=false,pointerDown=false,hands=null,handsReady=false,busy=false;
+let statics=[],runners=[],spawnAcc=0;
+let audio=null,rainGain=null,rainOn=true;
+
+const pen={down:false,prev:null,mid:null};
+const hand={seen:false,target:null,brush:null,star:null,relCount:0,relStart:0,ratio:1,tips:null,fist:null,fistN:0};
+let showDots=false;
+const small=document.createElement('canvas'),sctx=small.getContext('2d');
+const PEN=0.7;   // writing: one stroke clears a crisp line
+const FIST=0.3;  // fist wipe: one pass clears about two thirds
+const wipe={last:null};
+
+/* ---------- sizing ---------- */
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;
+  view.width=Math.round(W*DPR);view.height=Math.round(H*DPR);
+  FS=0.5*DPR;
+  const old=document.createElement('canvas');
+  old.width=fog.width;old.height=fog.height;
+  if(fog.width)old.getContext('2d').drawImage(fog,0,0);
+  fog.width=Math.max(1,Math.round(W*FS));fog.height=Math.max(1,Math.round(H*FS));
+  frost.width=fog.width;frost.height=fog.height;
+  if(old.width)fctx.drawImage(old,0,0,fog.width,fog.height);else fullFog();
+  makeStatics();computeCover();
+}
+function computeCover(){
+  const vw=video.videoWidth||16,vh=video.videoHeight||9,s=Math.max(W/vw,H/vh);
+  cover.w=vw*s;cover.h=vh*s;cover.x=(W-cover.w)/2;cover.y=(H-cover.h)/2;
+}
+function drawVideo(c,scale){
+  c.save();c.translate(W*scale,0);c.scale(-scale,scale);
+  c.drawImage(video,cover.x,cover.y,cover.w,cover.h);c.restore();
+}
+
+/* ---------- fog ---------- */
+function addFog(a){fctx.globalCompositeOperation='source-over';fctx.fillStyle=`rgba(255,255,255,${a})`;fctx.fillRect(0,0,fog.width,fog.height);}
+function fullFog(){fctx.globalCompositeOperation='source-over';fctx.clearRect(0,0,fog.width,fog.height);addFog(0.55);}
+function stamp(x,y,r,strength){
+  const fx=x*FS,fy=y*FS,fr=Math.max(1,r*FS);
+  const g=fctx.createRadialGradient(fx,fy,0,fx,fy,fr);
+  g.addColorStop(0,`rgba(0,0,0,${strength})`);
+  g.addColorStop(0.55,`rgba(0,0,0,${strength*0.85})`);
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  fctx.globalCompositeOperation='destination-out';
+  fctx.fillStyle=g;fctx.beginPath();fctx.arc(fx,fy,fr,0,TAU);fctx.fill();
+  fctx.globalCompositeOperation='source-over';
+}
+function penTo(x,y,r){
+  if(!pen.prev){pen.prev={x,y};pen.mid={x,y};stamp(x,y,r,PEN);return;}
+  if(Math.hypot(x-pen.prev.x,y-pen.prev.y)<0.0006*W)return;
+  const mid={x:(pen.prev.x+x)/2,y:(pen.prev.y+y)/2};
+  const len=Math.hypot(mid.x-pen.mid.x,mid.y-pen.mid.y);
+  const n=Math.min(80,Math.max(1,Math.ceil(len/Math.max(1,r*0.3))));
+  for(let i=1;i<=n;i++){
+    const t=i/n,u=1-t;
+    stamp(u*u*pen.mid.x+2*u*t*pen.prev.x+t*t*mid.x,u*u*pen.mid.y+2*u*t*pen.prev.y+t*t*mid.y,r,PEN);
+  }
+  pen.prev={x,y};pen.mid=mid;
+}
+function penLift(){pen.down=false;pen.prev=null;pen.mid=null;hand.relCount=0;}
+function wipeTo(x,y,r){
+  if(!wipe.last){stamp(x,y,r,FIST);wipe.last={x,y};return;}
+  const d=Math.hypot(x-wipe.last.x,y-wipe.last.y);
+  if(d>0.3*Math.max(W,H)){stamp(x,y,r,FIST);wipe.last={x,y};return;}
+  const step=r*0.5;if(d<step)return;
+  const n=Math.min(40,Math.floor(d/step)),ux=(x-wipe.last.x)/d,uy=(y-wipe.last.y)/d;
+  for(let i=1;i<=n;i++)stamp(wipe.last.x+ux*step*i,wipe.last.y+uy*step*i,r,FIST);
+  wipe.last={x:wipe.last.x+ux*step*n,y:wipe.last.y+uy*step*n};
+}
+/* ---------- raindrops ---------- */
+// Each drop is a tiny lens: it shows a sharp, upside-down, shrunken view of what is behind the glass,
+// with a dark rim, a bright caustic at the bottom and a small glint on top.
+const lens=document.createElement('canvas'),lctx=lens.getContext('2d');
+const LENS_K=4.5;
+function makeSprite(){
+  const s=96;sprite.width=sprite.height=s;const c=sprite.getContext('2d');
+  c.save();c.beginPath();c.arc(s/2,s/2,s/2,0,TAU);c.clip();
+  let g=c.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.62,'rgba(0,8,16,0.06)');g.addColorStop(0.86,'rgba(0,8,16,0.32)');g.addColorStop(0.97,'rgba(0,8,16,0.55)');g.addColorStop(1,'rgba(0,8,16,0.2)');
+  c.fillStyle=g;c.fillRect(0,0,s,s);
+  g=c.createLinearGradient(0,0,0,s);g.addColorStop(0,'rgba(0,0,0,0.28)');g.addColorStop(0.45,'rgba(0,0,0,0)');
+  c.fillStyle=g;c.fillRect(0,0,s,s);
+  g=c.createRadialGradient(s*0.5,s*0.82,0,s*0.5,s*0.82,s*0.34);g.addColorStop(0,'rgba(255,255,255,0.42)');g.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=g;c.fillRect(0,0,s,s);
+  c.restore();
+  c.fillStyle='rgba(255,255,255,0.92)';c.beginPath();c.ellipse(s*0.36,s*0.27,s*0.085,s*0.05,-0.5,0,TAU);c.fill();
+  c.fillStyle='rgba(255,255,255,0.5)';c.beginPath();c.arc(s*0.6,s*0.8,s*0.025,0,TAU);c.fill();
+}
+let mist=[];
+function newStatic(){const k=Math.random();return{x:rnd(0,W),y:rnd(0,H),r:k<0.7?rnd(2.2,4):k<0.95?rnd(4,7):rnd(7,10),sx:rnd(0.88,1.08),sy:rnd(0.92,1.12),rot:rnd(-0.4,0.4)};}
+function newMist(){return{x:rnd(0,W),y:rnd(0,H),r:rnd(0.5,1.5)};}
+function targetStatics(){return Math.round(W*H/5200);}
+function makeStatics(){
+  statics=[];mist=[];
+  for(let i=0,n=targetStatics();i<n;i++)statics.push(newStatic());
+  for(let i=0,n=Math.round(W*H/900);i<n;i++)mist.push(newMist());
+  lens.width=fog.width;lens.height=fog.height;
+}
+function updateRain(dt){
+  spawnAcc+=dt*0.6;
+  while(spawnAcc>1){spawnAcc--;runners.push({x:rnd(0,W),y:rnd(-20,H*0.4),r:rnd(4.5,7.5),v:0,stick:rnd(0,0.6),ph:rnd(0,TAU),trail:null});}
+  if(statics.length<targetStatics()&&Math.random()<dt*6)statics.push(newStatic());
+  for(const d of runners){
+    if(d.stick>0){d.stick-=dt;continue;}
+    d.v=Math.min(d.v+dt*(200+d.r*35),80+d.r*25);
+    d.y+=d.v*dt;d.x+=Math.sin(d.y*0.045+d.ph)*0.3;
+    if(Math.random()<dt*0.9){d.stick=rnd(0.08,0.6);d.v=0;}
+    if(!d.trail||Math.hypot(d.x-d.trail.x,d.y-d.trail.y)>d.r*0.1){
+      stamp(d.x,d.y-d.r*0.4,d.r*0.55,0.22);d.trail={x:d.x,y:d.y};
+      if(Math.random()<0.03)statics.push({x:d.x+rnd(-1,1),y:d.y-d.r*1.4,r:d.r*rnd(0.25,0.4),sx:1,sy:1.1,rot:0});
+    }
+    for(let i=statics.length-1;i>=0;i--){const s=statics[i];if(Math.abs(s.y-d.y)<d.r+s.r&&Math.abs(s.x-d.x)<d.r+s.r){statics.splice(i,1);d.r=Math.min(10,d.r+s.r*0.12);}}
+    for(let i=mist.length-1;i>=0;i--){const m=mist[i];if(Math.abs(m.y-d.y)<d.r&&Math.abs(m.x-d.x)<d.r*0.8){mist[i]=newMist();}}
+  }
+  runners=runners.filter(d=>d.y<H+30);
+}
+function lensDrop(pat,x,y,rx,ry,rot){
+  const k=LENS_K,a=-1/(k*FS);
+  pat.setTransform(new DOMMatrix([a,0,0,a,x*(1+k)/k,y*(1+k)/k]));
+  ctx.fillStyle=pat;ctx.beginPath();ctx.ellipse(x,y,rx,ry,rot,0,TAU);ctx.fill();
+  ctx.drawImage(sprite,x-rx,y-ry,rx*2,ry*2);
+}
+function drawRain(){
+  if(video.readyState>=2){
+    lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,lens.width,lens.height);
+    lctx.filter='brightness(1.12) contrast(1.08)';drawVideo(lctx,FS);lctx.filter='none';
+  }
+  for(const m of mist)ctx.drawImage(sprite,m.x-m.r,m.y-m.r,m.r*2,m.r*2);
+  const pat=ctx.createPattern(lens,'no-repeat');
+  for(const s of statics)lensDrop(pat,s.x,s.y,s.r*s.sx,s.r*s.sy,s.rot);
+  for(const d of runners){
+    lensDrop(pat,d.x,d.y,d.r*0.92,d.r*1.18,0);
+  }
+}
+
+/* ---------- hands ---------- */
+function releaseFrame(now){
+  if(!pen.down)return;
+  hand.relCount++;if(hand.relCount===1)hand.relStart=now;
+  if(hand.relCount>=2&&now-hand.relStart>=250)penLift();
+}
+function onHands(res){
+  const now=performance.now();
+  const lm=res.multiHandLandmarks&&res.multiHandLandmarks[0];
+  if(!lm){hand.seen=false;hand.fist=null;hand.fistN=0;wipe.last=null;releaseFrame(now);return;}
+  hand.seen=true;
+  const P=i=>({x:W-(cover.x+lm[i].x*cover.w),y:cover.y+lm[i].y*cover.h});
+  const wrist=P(0),palm=dist(wrist,P(9))||1;
+  // Fist = all four fingertips tucked in, closer to the wrist than their own knuckles (with a little slack).
+  // A writing pinch never passes this: the index reaches out to meet the thumb.
+  const tucked=[[8,5],[12,9],[16,13],[20,17]].every(([t,m])=>dist(P(t),wrist)<dist(P(m),wrist)*1.1);
+  hand.fistN=tucked?hand.fistN+1:0;
+  if(hand.fistN>=2){
+    if(pen.down)penLift();
+    const handW=Math.max(dist(P(5),P(17)),palm);
+    const c={x:(P(0).x+P(5).x+P(17).x+P(9).x)/4,y:(P(0).y+P(5).y+P(17).y+P(9).y)/4};
+    hand.fist={x:c.x,y:c.y,r:1.6*handW};hand.tips=null;
+    wipeTo(c.x,c.y,1.6*handW);
+    $('pinchdot').className='';
+    return;
+  }
+  if(tucked)return;
+  hand.fist=null;wipe.last=null;
+  // Pinch measured in 3D (metres), relative to palm size, so it works at any distance and when the hand is angled
+  const wl=res.multiHandWorldLandmarks&&res.multiHandWorldLandmarks[0];
+  const d3=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+  let ratio;
+  if(wl)ratio=d3(wl[4],wl[8])/(d3(wl[0],wl[9])||1);
+  else ratio=dist(P(4),P(8))/palm;
+  hand.ratio=ratio;
+  const L=+$('pinch').value,DOWN=0.25*L,UP=0.4*L;
+  const pt={x:(P(4).x+P(8).x)/2,y:(P(4).y+P(8).y)/2};
+  hand.tips=[P(4),P(8)];
+  if(!hand.target)hand.target={...pt};
+  hand.target.x+=(pt.x-hand.target.x)*0.5;hand.target.y+=(pt.y-hand.target.y)*0.5;
+  if(!pen.down){
+    if(ratio<DOWN&&dist(P(8),wrist)>dist(P(5),wrist)*1.1){pen.down=true;hand.relCount=0;hand.brush={...hand.target};pen.prev=null;pen.mid=null;}
+  }else if(ratio>UP)releaseFrame(now);
+  else hand.relCount=0;
+  const dot=$('pinchdot');dot.className=pen.down?'on':ratio<UP?'near':'';
+}
+function sendFrame(){
+  if(busy||video.readyState<2||(!handsReady&&!faceReady))return;
+  busy=true;
+  const vw=video.videoWidth,vh=video.videoHeight,k=Math.min(1,640/vw);
+  if(small.width!==Math.round(vw*k)){small.width=Math.round(vw*k);small.height=Math.round(vh*k);}
+  sctx.drawImage(video,0,0,small.width,small.height);
+  const doFace=faceReady&&(++faceN%5===0);
+  let p=handsReady?hands.send({image:small}):Promise.resolve();
+  if(doFace)p=p.then(()=>faceDet.send({image:small}));
+  p.then(()=>{busy=false;});
+}
+
+/* ---------- pointer (mouse / touch) ---------- */
+function ptr(e){const r=view.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+view.addEventListener('pointerdown',e=>{if(!running)return;view.setPointerCapture(e.pointerId);pointerDown=true;pen.prev=null;const p=ptr(e);penTo(p.x,p.y,brush);});
+view.addEventListener('pointermove',e=>{if(!pointerDown)return;const p=ptr(e);penTo(p.x,p.y,brush);});
+const up=()=>{if(pointerDown){pointerDown=false;pen.prev=null;pen.mid=null;}};
+view.addEventListener('pointerup',up);view.addEventListener('pointercancel',up);
+
+/* ---------- breath ---------- */
+let an=null,abuf=null,floor=0.01,lastKey=0,breathFrame=0,faceBusy=false,faceDet=null,faceN=0;
+const mouth={x:0,y:0,tx:0,ty:0,set:false,seen:0};
+let micStream=null,micSrc=null;
+async function startMic(id){
+  try{
+    if(micStream)micStream.getTracks().forEach(t=>t.stop());
+    if(micSrc)micSrc.disconnect();
+    const a={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
+    if(id)a.deviceId={exact:id};
+    micStream=await navigator.mediaDevices.getUserMedia({audio:a,video:false});
+    if(!audio)startAudio();
+    if(audio.state==='suspended')await audio.resume();
+    micSrc=audio.createMediaStreamSource(micStream);
+    if(!an){an=audio.createAnalyser();an.fftSize=1024;abuf=new Float32Array(an.fftSize);}
+    micSrc.connect(an);floor=0.01;
+    const cur=micStream.getAudioTracks()[0].getSettings().deviceId;
+    const mics=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput');
+    $('micsel').innerHTML=mics.map((d,i)=>`<option value="${d.deviceId}" style="color:#000">${(d.label||'Microphone '+(i+1)).replace(/</g,'&lt;').slice(0,40)}</option>`).join('');
+    if(cur)$('micsel').value=cur;
+  }catch(e){toast('Microphone blocked, so blowing will not fog the glass. Allow the microphone and reload, or hold Space to fog it.',8000);console.error(e);}
+}
+let lastLv=0,lastFloor=0,breathMeter=0;
+function breathLevel(){
+  if(!an)return 0;
+  an.getFloatTimeDomainData(abuf);
+  let sum=0;for(let i=0;i<abuf.length;i++)sum+=abuf[i]*abuf[i];
+  const lv=Math.sqrt(sum/abuf.length);lastLv=lv;
+  // the floor chases the room's noise: quickly down, very slowly up
+  if(lv<floor)floor+=(lv-floor)*0.05;else floor+=(lv-floor)*0.0008;
+  lastFloor=floor;
+  const k=+$('bsens').value,TH=0.0025/k,FULL=0.0005/k;
+  breathMeter=(lv-floor)/(TH*2);
+  if(performance.now()-lastKey<300)return 0;
+  if(lv<=floor+TH)return 0;
+  return Math.min(1,(lv-floor-TH)/FULL);
+}
+function g3(){return(Math.random()+Math.random()+Math.random()-1.5)/1.5;}
+function breathe(strength){
+  const short=Math.min(W,H),reach=0.43*short;
+  const cx=mouth.set?mouth.x:W/2,cy=(mouth.set?mouth.y:H*0.58)+short*0.06;
+  fctx.globalCompositeOperation='source-over';
+  for(let i=0;i<12;i++){
+    const x=cx+g3()*reach*0.5*1.45,y=cy+g3()*reach*0.5,r=short*rnd(0.06,0.14);
+    const fx=x*FS,fy=y*FS,fr=r*FS,a=0.36*strength;
+    const g=fctx.createRadialGradient(fx,fy,0,fx,fy,fr);
+    g.addColorStop(0,`rgba(255,255,255,${a})`);g.addColorStop(0.4,`rgba(255,255,255,${a})`);g.addColorStop(1,'rgba(255,255,255,0)');
+    fctx.fillStyle=g;fctx.beginPath();fctx.arc(fx,fy,fr,0,TAU);fctx.fill();
+  }
+}
+function onFace(res){
+  const d=res.detections&&res.detections[0];if(!d||!d.landmarks||!d.landmarks[3])return;
+  const m=d.landmarks[3];
+  mouth.tx=W-(cover.x+m.x*cover.w);mouth.ty=cover.y+m.y*cover.h;mouth.seen=performance.now();
+  if(!mouth.set){mouth.x=mouth.tx;mouth.y=mouth.ty;mouth.set=true;}
+}
+let faceReady=false;
+
+/* ---------- render ---------- */
+function star(x,y,s,a){
+  ctx.save();ctx.globalAlpha=a;ctx.shadowColor='rgba(255,240,210,0.9)';ctx.shadowBlur=s*2;ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.moveTo(x,y-s);ctx.quadraticCurveTo(x,y,x+s,y);ctx.quadraticCurveTo(x,y,x,y+s);ctx.quadraticCurveTo(x,y,x-s,y);ctx.quadraticCurveTo(x,y,x,y-s);ctx.fill();ctx.restore();
+}
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(running){
+    sendFrame();
+    if(video.videoWidth&&(cover.w===1||Math.abs(cover.w/cover.h-video.videoWidth/video.videoHeight)>0.01))computeCover();
+    const drawing=pen.down||pointerDown;
+    if(pen.down&&hand.target){
+      if(!hand.brush)hand.brush={...hand.target};
+      hand.brush.x+=(hand.target.x-hand.brush.x)*0.3;hand.brush.y+=(hand.target.y-hand.brush.y)*0.3;
+      penTo(hand.brush.x,hand.brush.y,brush);
+    }
+    if(hand.target){if(!hand.star)hand.star={...hand.target};hand.star.x+=(hand.target.x-hand.star.x)*0.55;hand.star.y+=(hand.target.y-hand.star.y)*0.55;}
+    if(mouth.set){mouth.x+=(mouth.tx-mouth.x)*0.4;mouth.y+=(mouth.ty-mouth.y)*0.4;}
+    const br=breathLevel();
+    const bl=$('breathlv');bl.style.width=Math.max(0,Math.min(100,breathMeter*100))+'%';bl.className=br>0?'on':'';
+    if(br>0&&!drawing&&(++breathFrame%2===0))breathe(br);
+    if(spaceHeld)addFog(0.03*dt*60);
+    else if(!drawing&&REFOG[refogI][1]>0)addFog(REFOG[refogI][1]*dt*60);
+    updateRain(dt);
+
+    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,view.width,view.height);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    if(video.readyState>=2)drawVideo(ctx,1);
+    ctx.fillStyle='rgba(30,50,70,0.12)';ctx.fillRect(0,0,W,H);
+    rctx.setTransform(1,0,0,1,0,0);rctx.globalCompositeOperation='source-over';rctx.clearRect(0,0,frost.width,frost.height);
+    rctx.filter=`blur(${18*FS}px) brightness(1.18)`;
+    if(video.readyState>=2)drawVideo(rctx,FS);
+    rctx.filter='none';
+    rctx.fillStyle='rgba(228,235,241,0.62)';rctx.fillRect(0,0,frost.width,frost.height);
+    rctx.globalCompositeOperation='destination-in';rctx.drawImage(fog,0,0);
+    rctx.globalCompositeOperation='source-over';
+    ctx.drawImage(frost,0,0,W,H);
+    drawRain();
+    if(showDots&&hand.seen&&hand.tips){ctx.save();ctx.strokeStyle=pen.down?'#ff8fb1':'rgba(255,255,255,0.7)';ctx.fillStyle=ctx.strokeStyle;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hand.tips[0].x,hand.tips[0].y);ctx.lineTo(hand.tips[1].x,hand.tips[1].y);ctx.stroke();for(const t of hand.tips){ctx.beginPath();ctx.arc(t.x,t.y,5,0,TAU);ctx.fill();}ctx.font='13px DM Sans, sans-serif';ctx.fillText('pinch '+hand.ratio.toFixed(2)+(pen.down?' · writing':''),hand.tips[1].x+10,hand.tips[1].y-10);ctx.restore();}
+    if(showDots&&mouth.set){ctx.save();const live=performance.now()-mouth.seen<1000;ctx.strokeStyle=live?'#9fe3ff':'rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(mouth.x,mouth.y,10,0,TAU);ctx.stroke();ctx.font='13px DM Sans, sans-serif';ctx.fillStyle=ctx.strokeStyle;ctx.fillText(live?'mouth':'mouth (lost)',mouth.x+14,mouth.y+4);ctx.restore();}
+    if(hand.seen&&hand.fist){ctx.save();ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.arc(hand.fist.x,hand.fist.y,hand.fist.r,0,TAU);ctx.stroke();ctx.restore();}
+    else if(hand.seen&&hand.star)star(hand.star.x,hand.star.y,pen.down?9:6,pen.down?1:0.6);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- rain sound ---------- */
+function startAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  audio=new AC();
+  const len=audio.sampleRate*3,buf=audio.createBuffer(1,len,audio.sampleRate),d=buf.getChannelData(0);
+  let b=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;b=(b+0.02*w)/1.02;d[i]=b*3.2+w*0.06;}
+  const src=audio.createBufferSource();src.buffer=buf;src.loop=true;
+  const lp=audio.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1400;
+  const hp=audio.createBiquadFilter();hp.type='highpass';hp.frequency.value=180;
+  rainGain=audio.createGain();rainGain.gain.value=0;
+  src.connect(hp);hp.connect(lp);lp.connect(rainGain);rainGain.connect(audio.destination);src.start();
+  rainGain.gain.linearRampToValueAtTime(0.35,audio.currentTime+2);
+}
+function setRain(on){rainOn=on;$('rain').textContent='rain: '+(on?'on':'off');if(rainGain)rainGain.gain.linearRampToValueAtTime(on?0.35:0,audio.currentTime+0.6);}
+
+/* ---------- start / camera ---------- */
+const PHONE=/camo|continuity|iriun|epoc|droidcam/i;
+function toast(t,ms=5000){const el=$('toast');el.textContent=t;el.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.style.display='none',ms);}
+function goFull(){
+  const d=document.documentElement;
+  if(!document.fullscreenElement&&d.requestFullscreen)d.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+}
+function toggleFull(){
+  if(document.fullscreenElement){if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});}
+  else goFull();
+}
+async function start(){
+  goFull(); // must run straight from the click, before anything is awaited
+  $('go').disabled=true;$('go').textContent='opening…';$('err').textContent='';
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1920},height:{ideal:1080}},audio:false});}
+  catch(e){
+    $('go').disabled=false;$('go').textContent='open the window';
+    $('err').textContent=e.name==='NotAllowedError'?'The camera was refused. Allow the camera for this page in your browser (and on a Mac in System Settings → Privacy & Security → Camera), then try again.':'Could not open the camera ('+e.name+'). Close other apps using it and try again.';
+    return;
+  }
+  const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  const ph=devs.find(d=>PHONE.test(d.label));
+  if(ph&&ph.deviceId!==stream.getVideoTracks()[0].getSettings().deviceId){
+    stream.getTracks().forEach(t=>t.stop());
+    stream=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:ph.deviceId},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    toast('Using '+ph.label);
+  }
+  video.srcObject=stream;await video.play();computeCover();
+  if(!audio)startAudio();else if(audio.state==='suspended')audio.resume();
+  setRain(rainOn);
+  fullFog();running=true;$('start').style.display='none';
+  setTimeout(()=>{$('hint').style.opacity='0';},9000);
+  await startMic();
+  if(!hands&&window.Hands){
+    hands=new window.Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}`});
+    hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.5,minTrackingConfidence:0.4});
+    hands.onResults(onHands);
+    await hands.initialize();handsReady=true;
+    toast('Hand tracking ready. Pinch to write.',3000);
+  }else if(!window.Hands){toast('Hand tracking could not load (are you online?). You can still wipe by dragging with your mouse or finger.',8000);}
+  if(!faceDet&&window.FaceDetection){
+    faceDet=new window.FaceDetection({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4.1646425229/${f}`});
+    faceDet.setOptions({model:'short',minDetectionConfidence:0.5});
+    faceDet.onResults(onFace);
+    faceDet.initialize().then(()=>{faceReady=true;}).catch(e=>{faceDet=null;toast('Face tracking could not start, so breath fog will bloom from the centre instead.',6000);console.error(e);});
+  }
+}
+function stop(){
+  running=false;
+  if(video.srcObject)video.srcObject.getTracks().forEach(t=>t.stop());
+  video.srcObject=null;penLift();
+  $('start').style.display='grid';$('go').disabled=false;$('go').textContent='open the window';
+  if(rainGain)rainGain.gain.linearRampToValueAtTime(0,audio.currentTime+0.4);
+}
+function save(){
+  view.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rainy-window.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
+  toast('Saved rainy-window.png',2500);
+}
+
+/* ---------- controls ---------- */
+$('go').addEventListener('click',start);
+$('brush').addEventListener('input',e=>{brush=+e.target.value;});
+$('micsel').addEventListener('change',e=>{startMic(e.target.value).then(()=>toast('Microphone switched. Stay quiet for a second while it learns the room.',3500));});
+$('full').addEventListener('click',toggleFull);
+document.addEventListener('fullscreenchange',()=>{$('full').textContent=document.fullscreenElement?'exit full screen':'full screen';});
+$('resetw').addEventListener('click',()=>{penLift();fullFog();});
+$('dots').addEventListener('click',()=>{showDots=!showDots;$('dots').textContent='tracking dots: '+(showDots?'on':'off');});
+$('refog').addEventListener('click',()=>{refogI=(refogI+1)%REFOG.length;$('refog').textContent='refog: '+REFOG[refogI][0];});
+$('rain').addEventListener('click',()=>setRain(!rainOn));
+$('hide').addEventListener('click',()=>{document.body.classList.add('clean');toast('Press H or tap with two fingers to bring the controls back',3000);});
+$('shutter').addEventListener('click',save);
+view.addEventListener('touchstart',e=>{if(e.touches.length===2)document.body.classList.remove('clean');},{passive:true});
+addEventListener('keydown',e=>{
+  lastKey=performance.now();
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(k===' '){e.preventDefault();spaceHeld=true;}
+  else if(k==='c'&&running)fullFog();
+  else if(k==='s'&&running)save();
+  else if(k==='h')document.body.classList.toggle('clean');
+  else if(k==='f'&&running)toggleFull();
+  else if(k==='escape'&&running&&!document.fullscreenElement)stop();
+});
+addEventListener('keyup',e=>{if(e.key===' ')spaceHeld=false;});
+addEventListener('resize',resize);
+
+makeSprite();resize();requestAnimationFrame(frame);
+
+}
+</script>
+</body>
+</html>

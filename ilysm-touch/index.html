@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I love you so much · fingertip words</title>
+<meta name="description" content="Words float on your fingertips. Touch your thumb to each one and it plays out loud.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{overflow-x:clip}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,70px) 20px 60px;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px;text-decoration:none;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:34px}
+.hero p{max-width:540px;margin:0 auto 24px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+.card{border-radius:20px;padding:22px 22px 18px;margin-top:20px}
+.card h3{margin:0 0 10px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:5px 0}
+kbd{font:500 12px ui-monospace,monospace;border-radius:6px;padding:1px 6px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ph h3{margin:0}
+#copy{min-height:44px;padding:0 18px}
+pre{margin:0;max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;border-radius:12px;padding:16px;font:13px/1.6 ui-monospace,"DM Mono",monospace}
+.steps{margin:0 0 12px;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+.btn:focus-visible,.back:focus-visible,#copy:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.preview{display:block;position:relative;aspect-ratio:16/10;width:100%;max-width:580px;margin:0 auto 22px;border-radius:18px;overflow:hidden;text-decoration:none;box-shadow:0 24px 60px rgba(0,0,0,.35);transition:transform .25s}
+.preview{outline:1px solid rgba(127,127,127,.25);outline-offset:-1px}
+.preview:hover{transform:translateY(-3px)}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .tag{position:absolute;right:12px;bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lead{max-width:540px;margin:0 auto 22px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:44px 0 4px;text-align:center}
+.sec-title{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.sec-title .n{font:600 14px ui-monospace,"DM Mono",monospace;opacity:.6}
+.sec-title h3{margin:0}
+.sub{margin:0 0 14px;font-size:14px;opacity:.85}
+.ver{border-top:1px solid rgba(127,127,127,.25);padding:16px 0 4px}
+.ver h4{margin:0 0 4px;font-size:16px}
+.ver p{margin:0 0 10px;font-size:14px;opacity:.9}
+.ver ul{margin:0 0 12px;padding-left:18px;font-size:14px}
+.ver li{margin:3px 0}
+.go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:inherit}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(127,127,127,.4)}
+.acts.left{justify-content:flex-start;margin:4px 0 16px}
+.bugs{margin:0;padding-left:0;list-style:none}
+.bugs li{padding:10px 0;border-top:1px solid rgba(127,127,127,.22);font-size:14px}
+.bugs b{display:block;margin-bottom:2px}
+.bugs span{opacity:.85}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.preview{transition:none}}
+
+/* VOICE playful, sweet · IDEA the phrase lit on fingertips · PICTURE coloured italic words with red fingertip dots on black
+   COLOUR black, five neon word colours, red dots · TYPE italic Arial + Inter · LAYOUT one centred column */
+body{background:#000;color:#f2f2f2;font:15px/1.6 Inter,Arial,sans-serif}
+.back{color:#bbb}
+h1{font:italic 700 clamp(40px,8vw,72px)/1.1 Arial,Helvetica,sans-serif;margin:0 0 6px;letter-spacing:.01em}
+h1 span{position:relative;display:inline-block;padding-bottom:.32em}
+h1 span::after{content:"";position:absolute;left:50%;bottom:0;width:.24em;height:.24em;border-radius:50%;background:#ff1010;transform:translateX(-50%)}
+.hero p{color:#ccc}
+.btn{background:rgba(255,255,255,.92);color:#111;font:600 15px Arial,sans-serif}
+.btn:hover{background:#fff}
+.btn.alt{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}
+.btn.alt:hover{background:rgba(255,255,255,.08)}
+.card{background:rgba(20,20,20,.92);border:1px solid rgba(255,255,255,.12)}
+.card h3{font:italic 700 22px/1.2 Arial,sans-serif;color:#7dff1f}
+.card ul{color:#ddd;font-size:14px}
+kbd{background:rgba(255,255,255,.14)}
+#copy{font-size:14px}
+pre{background:#0d0d0d;color:#e9e9e9;border:1px solid rgba(255,255,255,.08)}
+.steps{color:#aaa}
+footer{color:#888}
+</style>
+</head>
+<body>
+
+<main>
+  <a class="back" href="../">← back to the pond</a>
+  <section class="hero">
+    <h1><span style="color:#9a2bff">I</span> <span style="color:#7dff1f">love</span> <span style="color:#4a4aff">you</span> <span style="color:#2ee6e6">so</span> <span style="color:#ff2a8a">much</span></h1>
+    <p>Words float on your fingertips. Touch your thumb to each fingertip and its word plays out loud.</p>
+    <a class="preview" href="i-love-you-so-much.html" aria-label="open fingertip words"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
+    <div class="acts"><a class="btn" href="i-love-you-so-much.html">open it now →</a><a class="btn alt" href="https://www.instagram.com/reel/DgE0AfrpqqM/" target="_blank" rel="noopener">watch the reel ↗</a></div>
+  </section>
+
+  <p class="kicker">two ways to try it</p>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">01</span><h3>play with it now</h3></div>
+    <p class="sub">it's already live, 2 versions. click <b>Start camera</b>, hold both hands up and tap once so the sound can play.</p>
+    <div class="ver"><h4>I love you so much</h4><p>left hand: I, love, you. right hand: so, much.</p><ul><li>touch your thumb's red dot to a fingertip's red dot to play that word</li><li>words on the wrong hands? tap <b>Swap hands</b> · open <b>Sounds</b> to record each word in your own voice</li></ul><a class="go" href="i-love-you-so-much.html">open I love you so much ↗</a></div><div class="ver"><h4>don't forget to love yourself 💌</h4><p>same idea, a softer phrase for your own two hands.</p><ul><li><b>Record</b> saves a clip with sound · <kbd>H</kbd> hides the controls</li></ul><a class="go" href="dont-forget-to-love-yourself.html">open don't forget to love yourself ↗</a></div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">02</span><h3>build your own fingertip words</h3></div>
+    <p class="sub">copy my prompt into Claude or ChatGPT and ask it to build you a single HTML file. you might need to tweak a few things depending on your setup. i wrote down the <a href="#bugs" style="color:inherit">bugs i ran into</a> (they're baked into the prompt too), so you can skip some of the trial and error.</p>
+    <div class="meta"><span class="pill">⏱ takes ~15 minutes</span><span class="pill">single HTML file</span><span class="pill">webcam · works on phones</span></div>
+    <div class="acts left"><button class="btn" id="copy">copy prompt</button><a class="btn alt" href="i-love-you-so-much.html">see mine first</a></div>
+    <pre id="prompt">Build a single standalone HTML file called i-love-you-so-much.html that I open in Chrome. Use MediaPipe Hand Landmarker (tasks-vision 0.10.14, 2 hands) on my webcam, drawn mirrored onto a canvas on a black page. Draw a red dot (#ff1010) on all ten fingertips. Put a word just above some fingertip dots, in italic Arial, centred, following my fingers smoothly:
+- Left hand (shows on the right of the screen): index = &quot;I&quot; (#9a2bff), middle = &quot;love&quot; (#7dff1f), ring = &quot;you&quot; (#1f1fff)
+- Right hand: index = &quot;so&quot; (#2ee6e6), middle = &quot;much&quot; (#ff2a8a)
+Keep these in two editable lines at the top of the script called HAND_A and HAND_B.
+
+Pinch detection on screen: when my thumb&#x27;s red dot touches a fingertip&#x27;s dot, that word plays and briefly pops bigger. It counts as touching within about 1.6 dot-widths centre to centre, or 30% of the hand&#x27;s size when my hand is close. All four fingers compete and only the closest fires, once per pinch; it can&#x27;t fire again until the dots move 1.7x further apart, plus a 120 ms cooldown.
+
+Sounds panel: each word uses the browser&#x27;s voice until I record my own. Per word: play, record (1.5 seconds, or tap to stop), upload a clip, and clear. Trim silence from recordings, normalise the volume and save them in the browser. Only open the microphone while recording a word, so the speakers don&#x27;t drop into laggy call-mode audio. Run all word sounds through a limiter so overlapping words don&#x27;t crackle. Options: &quot;Also record my mic in clips&quot; (off by default), &quot;Flash the word when it&#x27;s triggered&quot; (on), a Tight &lt;-&gt; Loose pinch slider (remembered), and &quot;Show detection&quot; (a ring on the active finger and a number per finger, below 1.00 = touching).
+
+Bottom controls: Landscape / Vertical 9:16 output, Sounds, Flip camera (cycles cameras on laptops), Swap hands, Record / Save clip (the canvas plus word sounds, .mp4 if supported, otherwise .webm), Hide controls (H brings them back). Start screen shows the phrase in its colours with a &quot;Start camera&quot; button. On phones, use 720p, run detection a bit less often, and resume audio on every tap and when the page comes back into view.
+
+(For a different phrase, swap the words in HAND_A and HAND_B, keep the same colours in the same finger positions, and change the title, start screen text and saved clip name to match.)
+
+BUGS I RAN INTO (handle these from the start):
+- the words landed on the wrong hands because the camera is mirrored → the left hand shows on the right of the screen; add a Swap hands button just in case
+- one pinch played the word over and over → fire once per pinch, then wait until the dots are 1.7x further apart plus a 120 ms cooldown
+- recording my voice made my laptop audio go quiet and laggy → only open the microphone while a word is being recorded, so the speakers never switch to call mode
+- overlapping words crackled → run all word sounds through a limiter</pre>
+    <p class="sub" style="margin-top:14px">have fun making yours :) save the file, open it in Chrome, and tag me if you post it.</p>
+  </section>
+
+  <section class="card" id="bugs">
+    <div class="sec-title"><span class="n">✎</span><h3>bugs i ran into</h3></div>
+    <p class="sub">if yours does something weird, it's probably one of these. paste the fix back into the chat.</p>
+    <ul class="bugs"><li><b>the words landed on the wrong hands because the camera is mirrored</b><span>fix: the left hand shows on the right of the screen; add a Swap hands button just in case</span></li><li><b>one pinch played the word over and over</b><span>fix: fire once per pinch, then wait until the dots are 1.7x further apart plus a 120 ms cooldown</span></li><li><b>recording my voice made my laptop audio go quiet and laggy</b><span>fix: only open the microphone while a word is being recorded, so the speakers never switch to call mode</span></li><li><b>overlapping words crackled</b><span>fix: run all word sounds through a limiter</span></li></ul>
+  </section>
+
+  <footer>made by <a href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">@imeleshi</a> with Claude · <a href="../">more little things in the pond</a></footer>
+</main>
+<script>
+{
+const b=document.getElementById('copy');
+b.addEventListener('click',async()=>{
+  const t=document.getElementById('prompt').textContent;
+  try{await navigator.clipboard.writeText(t);b.textContent='copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected — press ⌘C';}
+  setTimeout(()=>b.textContent='copy prompt',2200);
+});
+}
+</script>
+<script>
+{
+const cv=document.getElementById('pv');if(cv){
+const x=cv.getContext('2d');let W,H,t0=performance.now();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=r.width*d;H=cv.height=r.height*d;}
+addEventListener('resize',size);size();
+const draw=(x,W,H,t)=>{
+ x.fillStyle='#000';x.fillRect(0,0,W,H);
+ const hands=[{cx:.27,words:[['so','#2ee6e6'],['much','#ff2a8a'],null,null]},{cx:.73,words:[['I','#9a2bff'],['love','#7dff1f'],['you','#4a4aff'],null]}];
+ const seq=[[1,0],[1,1],[1,2],[0,0],[0,1]],step=Math.floor(t/1.1)%seq.length,ph=(t%1.1)/1.1;
+ hands.forEach((h,hi)=>{const bx=W*h.cx,by=H*.72+Math.sin(t*1.3+hi)*H*.015,sp=W*.08,dots=[];
+  for(let f=0;f<4;f++){const a=(-.9+f*.6)*(hi?1:-1)*.5;dots.push([bx+(f-1.5)*sp*(hi?1:-1),by-H*(.36-Math.abs(f-1.2)*.06)+Math.sin(t*2+f)*H*.006]);}
+  const thumbHome=[bx+(hi?-1:1)*sp*2.3,by-H*.05];let th=thumbHome;const[sh,sf]=seq[step];
+  if(sh===hi){const tg=dots[sf],e=ph<.5?ph*2:2-ph*2,ee=e*e*(3-2*e);th=[thumbHome[0]+(tg[0]-thumbHome[0])*ee,thumbHome[1]+(tg[1]-thumbHome[1])*ee];}
+  x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=W*.003;[...dots,th].forEach(d=>{x.beginPath();x.moveTo(bx,by+H*.12);x.lineTo(d[0],d[1]);x.stroke();});
+  dots.forEach((d,f)=>{const w=h.words[f];if(w){const hit=sh===hi&&sf===f&&ph>.38&&ph<.75;x.font=`italic 700 ${Math.round(W*(hit?.05:.032))}px Arial`;x.textAlign='center';x.fillStyle=w[1];x.fillText(w[0],d[0],d[1]-W*.025);}
+   x.fillStyle='#ff1010';x.beginPath();x.arc(d[0],d[1],W*.011,0,6.28);x.fill();});
+  x.fillStyle='#ff1010';x.beginPath();x.arc(th[0],th[1],W*.011,0,6.28);x.fill();});};
+function loop(now){draw(x,W,H,Math.max(0,(now-t0)/1000));if(!reduce)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+}}
+</script>
+
+</body>
+</html>

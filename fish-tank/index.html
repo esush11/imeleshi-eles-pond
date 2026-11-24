@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>魚缸 · the fish tank</title>
+<meta name="description" content="A dreamy Wong Kar-wai aquarium for your laptop.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Cormorant+Garamond:ital,wght@1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{overflow-x:clip}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,70px) 20px 60px;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px;text-decoration:none;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:34px}
+.hero p{max-width:540px;margin:0 auto 24px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+.card{border-radius:20px;padding:22px 22px 18px;margin-top:20px}
+.card h3{margin:0 0 10px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:5px 0}
+kbd{font:500 12px ui-monospace,monospace;border-radius:6px;padding:1px 6px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ph h3{margin:0}
+#copy{min-height:44px;padding:0 18px}
+pre{margin:0;max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;border-radius:12px;padding:16px;font:13px/1.6 ui-monospace,"DM Mono",monospace}
+.steps{margin:0 0 12px;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+.btn:focus-visible,.back:focus-visible,#copy:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.preview{display:block;position:relative;aspect-ratio:16/10;width:100%;max-width:580px;margin:0 auto 22px;border-radius:18px;overflow:hidden;text-decoration:none;box-shadow:0 24px 60px rgba(0,0,0,.35);transition:transform .25s}
+.preview{outline:1px solid rgba(127,127,127,.25);outline-offset:-1px}
+.preview:hover{transform:translateY(-3px)}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .tag{position:absolute;right:12px;bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lead{max-width:540px;margin:0 auto 22px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:44px 0 4px;text-align:center}
+.sec-title{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.sec-title .n{font:600 14px ui-monospace,"DM Mono",monospace;opacity:.6}
+.sec-title h3{margin:0}
+.sub{margin:0 0 14px;font-size:14px;opacity:.85}
+.ver{border-top:1px solid rgba(127,127,127,.25);padding:16px 0 4px}
+.ver h4{margin:0 0 4px;font-size:16px}
+.ver p{margin:0 0 10px;font-size:14px;opacity:.9}
+.ver ul{margin:0 0 12px;padding-left:18px;font-size:14px}
+.ver li{margin:3px 0}
+.go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:inherit}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(127,127,127,.4)}
+.acts.left{justify-content:flex-start;margin:4px 0 16px}
+.bugs{margin:0;padding-left:0;list-style:none}
+.bugs li{padding:10px 0;border-top:1px solid rgba(127,127,127,.22);font-size:14px}
+.bugs b{display:block;margin-bottom:2px}
+.bugs span{opacity:.85}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.preview{transition:none}}
+
+/* VOICE late-night fish shop · IDEA the tank's own label card · PICTURE glowing 魚缸 over violet water light
+   COLOUR deep violet, goldfish orange, subtitle yellow · TYPE Noto Serif TC + Cormorant + DM Mono · LAYOUT one centred column */
+body{background:radial-gradient(120% 70% at 50% 0%,#2c1f60 0%,#120d2c 50%,#07060f 100%) fixed;color:#ece9ff;font:15px/1.6 "DM Mono",ui-monospace,monospace}
+.back{color:#c7c3e6}
+h1{font:700 clamp(84px,18vw,150px)/1 "Noto Serif TC",serif;margin:0;color:#ff9d4a;letter-spacing:.08em;text-shadow:0 0 40px rgba(255,120,60,.55),0 0 90px rgba(255,80,160,.3)}
+h2{font:italic 500 clamp(28px,5vw,40px)/1.1 "Cormorant Garamond",serif;margin:6px 0 16px;color:#f2efff}
+.hero p{color:#c7c3e6;font-size:14px}
+.btn{background:#ffe33a;color:#17142b;font:500 15px "DM Mono",monospace}
+.btn:hover{background:#fff07a}
+.btn.alt{background:transparent;color:#ffe33a;border:1px solid rgba(255,227,58,.6)}
+.btn.alt:hover{background:rgba(255,227,58,.1)}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(230,225,255,.14)}
+.card h3{font:italic 500 26px/1.2 "Cormorant Garamond",serif;color:#fff}
+.card ul{color:#d6d2f0;font-size:14px}
+kbd{background:rgba(255,255,255,.12)}
+#copy{font-size:13px}
+pre{background:rgba(0,0,0,.35);color:#e6e2ff}
+.steps{color:#c7c3e6}
+footer{color:#8f8ab5}
+</style>
+</head>
+<body>
+
+<main>
+  <a class="back" href="../">← back to the pond</a>
+  <section class="hero">
+    <h1>魚缸</h1>
+    <h2>the fish tank</h2>
+    <p>A dreamy Wong Kar-wai-style aquarium for your laptop. Poke the glass, feed the 3D goldfish, and stand behind the glass with your webcam.</p>
+    <a class="preview" href="tank.html" aria-label="open fish tank"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
+    <div class="acts"><a class="btn" href="tank.html">open it now →</a><a class="btn alt" href="https://www.instagram.com/reel/DgHlT8_JLCp/" target="_blank" rel="noopener">watch the reel ↗</a></div>
+  </section>
+
+  <p class="kicker">two ways to try it</p>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">01</span><h3>play with it now</h3></div>
+    <p class="sub">it's already live. open it on your laptop and click <b>turn on the tank</b>. the sound comes on with it.</p>
+    <div class="ver"><h4>the tank</h4><p>3D goldfish drifting through violet water light. no camera needed.</p><ul><li>click or drag anywhere to poke the glass and make ripples</li><li><kbd>Space</kbd> feeds the fish · <kbd>M</kbd> changes the light · <kbd>S</kbd> takes a picture · <kbd>H</kbd> hides the controls</li></ul><a class="go" href="tank.html">open the fish tank ↗</a></div><div class="ver"><h4>you behind the glass ✋</h4><p>turn on <b>camera</b> and you appear behind the tank, lit by the water. turn on <b>hand play</b> to touch it with your hands.</p><ul><li>pinch to poke the glass · open your palm and the fish swim over</li><li>needs a webcam, works best in Chrome. nothing is uploaded</li></ul><a class="go" href="tank.html">open the tank with your camera ↗</a></div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">02</span><h3>build your own fish tank</h3></div>
+    <p class="sub">copy my prompt into Claude or ChatGPT and ask it to build you a single HTML file. you might need to tweak a few things depending on your setup. i wrote down the <a href="#bugs" style="color:inherit">bugs i ran into</a> (they're baked into the prompt too), so you can skip some of the trial and error.</p>
+    <div class="meta"><span class="pill">⏱ takes ~25 minutes</span><span class="pill">single HTML file</span><span class="pill">laptop + Chrome · webcam optional</span></div>
+    <div class="acts left"><button class="btn" id="copy">copy prompt</button><a class="btn alt" href="tank.html">see mine first</a></div>
+    <pre id="prompt">Build a single standalone HTML file called fish-tank.html that I open in Chrome on my laptop. It turns my screen into a dreamy aquarium in the style of Wong Kar-wai&#x27;s films (the goldfish tank in Chungking Express) and neon-lit aquarium photoshoots: late-night Hong Kong fish shop, nostalgic, a little lonely, glowing.
+
+PERFORMANCE
+Keep it fast: draw 2D layers on canvases at most 960 px wide, render WebGL at 1x (max 1600 px wide), never use canvas blur filters (fake blur by drawing small and scaling up), and run any hand tracking or segmentation at about 15–20 checks a second. Fall back to plain 2D if WebGL is missing.
+
+TANK (normal mode)
+Two 2D canvases: a BACK layer (teal water gradient, soft coloured bokeh light circles, swaying back plants, gravel, an air stone and tube, slow diagonal light shafts) and a FRONT layer (bubbles, food flakes, twinkling specks and glints on the glass, blurred out-of-focus front plants at the corners, the water surface line, a flickering fluorescent tube above the water, dark glass frame edges, a faint diagonal glass reflection). Bubbles make tiny ripples when they pop at the surface.
+
+3D GOLDFISH (WebGL)
+About 15 goldfish rendered as real 3D meshes from one procedural mesh: rounded body with elliptical cross-sections and a deeper belly, a forked double tail, a sail-like dorsal fin, an anal fin, and paired pelvic and pectoral fins. Varieties: mostly deep orange and red-orange, some gold, a few red-and-white and pearl white.
+- Vertex shader: bend the spine in a travelling wave that grows towards the tail, ripple the tail and fins, flap the pectorals, then pitch and yaw each fish so it really rotates in space when it turns around (randomly turning towards or away from the viewer).
+- Fragment shader: light the body with the mood&#x27;s two coloured lights (wrap diffuse, sharp specular modulated by a procedural scale pattern, a coloured fresnel rim, a slight self-glow), pale belly and darker back, noise-based red/white patches, a dark eye with a gold ring, a gill line. Fins are translucent with faint rays and soft fading edges. Fish take on the colour of the light and fade towards the water colour with distance.
+- Depth of field: draw far fish and the nearest fish into small framebuffers so they look out of focus, the middle ones sharp, and composite them between the BACK and FRONT layers.
+- Behaviour: fish wander with smooth steering, swim faster with faster tail beats, dart away from pokes then some come back curiously, swim up to eat food, and gather around my hand.
+
+WATER + FILM LOOK (WebGL passes)
+- A ripple height field (about 200 cells wide) refracts everything, with chromatic aberration and highlights on the ripple rings.
+- Feedback pass blending with the previous frame for soft trails, plus an optional &quot;step-print&quot; mode (off by default) that only updates every third frame with heavier blending, for Wong Kar-wai stutter.
+- Dreamy glow: bloom at 1/4 and 1/10 size, taken only from the tank layers and fish (never from my camera, so my face never blows out), with a glow slider.
+- Final pass: soft tone-mapping, film grain, vignette, slight gate weave, a warm light leak, fluorescent flicker.
+
+LIGHTING MOODS (M cycles, colours fade smoothly)
+chungking green, neon pink, blacklight blue (fish glow white-cyan), jade, goldfish glow, magenta haze, aqua. Each mood has water/deep colours, two light colours (lightA, lightB), a fish tint, bokeh colours and a colour grade.
+
+YOU BEHIND THE GLASS (button)
+Show my mirrored webcam behind the water as a close-up (no tank props, bigger fish in front of me, bubbles rising). Keep my room visible but light it like a neon aquarium: two coloured lights blending across the frame, slight soft focus, shadows lifted into the mood colour, darker edges, and auto-exposure so a bright webcam never blows out. A &quot;room: showing / dimmed&quot; button uses the MediaPipe selfie segmenter to fade the room only when I ask. Switch to neon pink when this turns on.
+
+INTERACTION
+- Click/tap = poke: big ripple, a water &quot;plip&quot; sound, nearby fish dart away. Dragging trails small ripples.
+- Space or the feed button sprinkles food that sinks.
+- &quot;Hand play&quot; (MediaPipe Hand Landmarker): my fingertip glows and leaves ripples, pinching thumb and index pokes, an open palm makes the fish gather around it. Show a small status pill (no hand seen / fingertip / pinch / open palm).
+
+CONTROLS
+Frosted glass pills along the bottom (DM Mono): you behind the glass, room, hand play, light (mood), glow slider, feed, step-print, subtitles, sound, a camera-icon button, record / save clip, full screen, hide (H, also hides the cursor).
+- Camera button (and S key): save a PNG of the tank exactly as shown, without the controls, subtitles burned in if on, with a white flash, a shutter sound and a &quot;Saved to your Downloads&quot; toast.
+- Record (R): record the canvas plus sound as .mp4 if supported, otherwise .webm, with subtitles burned in.
+- Subtitles: original yellow bilingual Chinese + English film-style lines (none quoted from real films), changing every 7 seconds.
+- Sound: generated aquarium hum, filter bubbling, fluorescent buzz, plus plip, bloop, gulp and sprinkle effects.
+- Keys: Space feed, M mood, S picture, R record, F full screen, H hide.
+
+START SCREEN
+Big &quot;魚缸&quot; in Noto Serif TC glowing goldfish orange, &quot;the fish tank&quot; in Cormorant italic, a short line about poking the glass, and a yellow &quot;turn on the tank&quot; button that goes full screen. Only ask for the camera when I turn on a camera option. Everything runs in the browser; nothing is uploaded.
+
+BUGS I RAN INTO (handle these from the start):
+- the dreamy glow washed my face out completely on the webcam → only bloom the tank layers (water, fish, front glass), never the camera, and add auto-exposure
+- poking the screen with a finger &quot;jab&quot; never registered → use a pinch to poke, an open palm to call the fish, and show a small status pill so you know it sees your hand
+- it was really slow and laggy → cap the scene at about 960px wide, render WebGL at 1x pixel ratio, no CSS canvas filters, step-print off by default
+- the fish looked flat and 2D → draw them as real 3D meshes in WebGL with a bending spine, fins and depth of field
+- the camera and screenshot button didn&#x27;t work in Claude&#x27;s preview → download the HTML file and open it in Chrome (or put it online)</pre>
+    <p class="sub" style="margin-top:14px">have fun making yours :) save the file, open it in Chrome, and tag me if you post it.</p>
+  </section>
+
+  <section class="card" id="bugs">
+    <div class="sec-title"><span class="n">✎</span><h3>bugs i ran into</h3></div>
+    <p class="sub">if yours does something weird, it's probably one of these. paste the fix back into the chat.</p>
+    <ul class="bugs"><li><b>the dreamy glow washed my face out completely on the webcam</b><span>fix: only bloom the tank layers (water, fish, front glass), never the camera, and add auto-exposure</span></li><li><b>poking the screen with a finger "jab" never registered</b><span>fix: use a pinch to poke, an open palm to call the fish, and show a small status pill so you know it sees your hand</span></li><li><b>it was really slow and laggy</b><span>fix: cap the scene at about 960px wide, render WebGL at 1x pixel ratio, no CSS canvas filters, step-print off by default</span></li><li><b>the fish looked flat and 2D</b><span>fix: draw them as real 3D meshes in WebGL with a bending spine, fins and depth of field</span></li><li><b>the camera and screenshot button didn't work in Claude's preview</b><span>fix: download the HTML file and open it in Chrome (or put it online)</span></li></ul>
+  </section>
+
+  <footer>made by <a href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">@imeleshi</a> with Claude · <a href="../">more little things in the pond</a></footer>
+</main>
+<script>
+{
+const b=document.getElementById('copy');
+b.addEventListener('click',async()=>{
+  const t=document.getElementById('prompt').textContent;
+  try{await navigator.clipboard.writeText(t);b.textContent='copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected — press ⌘C';}
+  setTimeout(()=>b.textContent='copy prompt',2200);
+});
+}
+</script>
+<script>
+{
+const cv=document.getElementById('pv');if(cv){
+const x=cv.getContext('2d');let W,H,t0=performance.now();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=r.width*d;H=cv.height=r.height*d;}
+addEventListener('resize',size);size();
+const draw=(x,W,H,t)=>{
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3a2780');g.addColorStop(.6,'#1a1240');g.addColorStop(1,'#08060f');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.globalCompositeOperation='lighter';
+ for(let i=0;i<5;i++){const cx=W*(.15+.18*i)+Math.sin(t*.4+i)*W*.04;const r=x.createRadialGradient(cx,0,0,cx,0,H*.9);r.addColorStop(0,'rgba(170,120,255,.16)');r.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=r;x.fillRect(0,0,W,H);}
+ x.globalCompositeOperation='source-over';
+ for(let i=0;i<14;i++){const bx=(i*97%100)/100*W,by=H-((t*30*(1+i%3)+i*53)%H);x.fillStyle='rgba(220,210,255,.35)';x.beginPath();x.arc(bx+Math.sin(t+i)*4,by,1.5+(i%3),0,6.28);x.fill();}
+ const fish=[[.0,.38,1,1],[.45,.6,-1,.8],[.7,.3,1,.6],[.2,.72,-1,.9]];
+ fish.forEach(([o,y,dir,s],i)=>{
+  let p=((t*.05*(1+i*.15)+o)%1.3)-.15;const fx=dir>0?p*W:W-p*W,fy=H*y+Math.sin(t*1.2+i)*H*.04,L=W*.09*s,w=Math.sin(t*6+i)*.35;
+  x.save();x.translate(fx,fy);x.scale(dir,1);x.shadowColor='rgba(255,130,60,.8)';x.shadowBlur=W*.03;
+  x.fillStyle='rgba(255,170,90,.55)';x.beginPath();x.moveTo(-L*.45,0);x.quadraticCurveTo(-L*.8,-L*.35+w*L*.3,-L*1.05,-L*.3+w*L*.5);x.quadraticCurveTo(-L*.8,w*L*.2,-L*1.05,L*.3+w*L*.5);x.quadraticCurveTo(-L*.8,L*.35+w*L*.3,-L*.45,0);x.fill();
+  const bg=x.createLinearGradient(0,-L*.25,0,L*.25);bg.addColorStop(0,'#ffb35c');bg.addColorStop(1,'#ff6a2a');x.fillStyle=bg;x.beginPath();x.ellipse(0,0,L*.5,L*.22,0,0,6.28);x.fill();
+  x.shadowBlur=0;x.fillStyle='#1a0d10';x.beginPath();x.arc(L*.32,-L*.05,L*.035,0,6.28);x.fill();x.restore();});
+ const k=t%2.4;if(k<1.6){const rx=W*(.3+.4*((Math.floor(t/2.4)*.37)%1)),ry=H*.45;for(let j=0;j<3;j++){const rr=(k*W*.12)-j*W*.03;if(rr>0){x.strokeStyle=`rgba(230,220,255,${.5*(1-k/1.6)})`;x.lineWidth=W*.003;x.beginPath();x.ellipse(rx,ry,rr,rr*.6,0,0,6.28);x.stroke();}}}
+ x.font=`${Math.round(W*.032)}px "Noto Serif TC",serif`;x.textAlign='center';x.fillStyle='#ffe33a';x.shadowColor='rgba(0,0,0,.6)';x.shadowBlur=6;
+ x.fillText('魚也會想念你嗎？',W/2,H*.86);x.font=`italic ${Math.round(W*.026)}px "Cormorant Garamond",serif`;x.fillText('do fish miss you too?',W/2,H*.93);x.shadowBlur=0;};
+function loop(now){draw(x,W,H,Math.max(0,(now-t0)/1000));if(!reduce)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+}}
+</script>
+
+</body>
+</html>

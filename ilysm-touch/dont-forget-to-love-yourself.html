@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Don't forget to love yourself – fingertip text</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#fff}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{max-width:100%;max-height:100%}
+  #ui{position:fixed;left:0;right:0;bottom:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;z-index:2;padding:0 10px}
+  button,select{font:600 15px Arial,sans-serif;padding:12px 18px;border-radius:999px;border:0;background:rgba(255,255,255,.92);color:#111;cursor:pointer}
+  #rec.on{background:#ff2a2a;color:#fff}
+  #msg{position:fixed;top:16px;left:0;right:0;text-align:center;font:15px Arial,sans-serif;text-shadow:0 1px 3px #000;z-index:2}
+  #dl{display:none}#dl button{background:#7dff1f}
+  .hide #ui,.hide #msg,.hide #panel{display:none!important}
+  #start{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#000;text-align:center;padding:20px}
+  #start h1{font:italic 700 44px Arial,sans-serif;margin:0}
+  #start h1 span:nth-child(1){color:#9a2bff}#start h1 span:nth-child(2){color:#7dff1f}#start h1 span:nth-child(3){color:#3a3aff}
+  #start h1 span:nth-child(4){color:#2ee6e6}#start h1 span:nth-child(5){color:#ff2a8a}
+  #start p{max-width:440px;color:#ccc;line-height:1.5;margin:0}
+  #panel{position:fixed;top:12px;right:12px;z-index:3;background:rgba(20,20,20,.92);border-radius:16px;padding:14px;width:min(340px,calc(100% - 24px));display:none;font-size:14px}
+  #panel.open{display:block}
+  #panel h3{margin:0 0 6px;font-size:15px}
+  #panel .row{display:flex;align-items:center;gap:6px;margin:8px 0}
+  #panel .w{flex:1;font:italic 700 18px Arial,sans-serif}
+  #panel button{padding:8px 11px;font-size:13px}
+  #panel button.recording{background:#ff2a2a;color:#fff}
+  #panel small{color:#aaa;display:block;line-height:1.4}
+  #panel label{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .tag{font-size:11px;color:#7dff1f;min-width:48px}
+</style>
+</head>
+<body>
+<div id="start">
+  <h1><span>don't</span> <span>forget</span> <span>to</span> <span>love</span> <span>yourself</span></h1>
+  <p>Touch a fingertip to your thumb to say its word.<br>
+  Left hand: index = don't, middle = forget, ring = to.<br>Right hand: index = love, middle = yourself.</p>
+  <button id="go">Start camera</button>
+</div>
+<div id="msg"></div>
+<div id="stage"><canvas id="c"></canvas></div>
+
+<div id="panel">
+  <h3>Word sounds</h3>
+  <small>Every word uses your browser's voice until you record your own. Tap ● and say the word. It records for 1.5 seconds, or tap ■ to stop sooner. You can also upload a clip with ⤒.</small>
+  <div id="rows"></div>
+  <label><input type="checkbox" id="micmix"> Also record my mic in clips</label>
+  <small>Off = only the word sounds go into your clip, with the cleanest, fastest audio. Turning it on keeps the mic open, which can make playback laggy and crunchy, especially on a phone or with Bluetooth headphones. Only use it if a word still uses the browser voice.</small>
+  <label><input type="checkbox" id="showpinch" checked> Flash the word when it's triggered</label>
+  <h3 style="margin-top:14px">Pinch detection</h3>
+  <label>Tight <input type="range" id="sens" min="0.5" max="2" step="0.05" value="1" style="flex:1"> Loose</label>
+  <small>Move left if words fire when you don't mean them to. Move right if your pinches are being missed.</small>
+  <label><input type="checkbox" id="debug"> Show detection (ring = finger that's active, number below 1.00 = touching)</label>
+</div>
+
+<div id="ui">
+  <select id="aspect" title="Output shape">
+    <option value="16:9">Landscape (like the original)</option>
+    <option value="9:16">Vertical 9:16</option>
+  </select>
+  <button id="sounds">Sounds</button>
+  <button id="flip">Flip camera</button>
+  <button id="swap">Swap hands</button>
+  <button id="rec">● Record</button>
+  <a id="dl"><button>⬇ Save clip</button></a>
+  <button id="hideui" title="Press H to bring controls back">Hide controls</button>
+</div>
+<video id="v" playsinline muted style="display:none"></video>
+
+<script type="module">
+// ---- Words pinned to fingertips (edit here) ----
+// Hand A = your LEFT hand (shows on the right of the mirrored screen, like the original)
+// Hand B = your RIGHT hand
+const HAND_A = { 8: ["don't", '#9a2bff'], 12: ['forget', '#7dff1f'], 16: ['to', '#1f1fff'] };
+const HAND_B = { 8: ['love', '#2ee6e6'], 12: ['yourself', '#ff2a8a'] };
+const TIPS = [4, 8, 12, 16, 20];           // thumb, index, middle, ring, pinky
+const DOT = '#ff1010';
+// Pinch detection: fires when the thumb's red dot touches a fingertip's red dot on screen.
+const TOUCH_DOTS = 3.2;   // dots count as touching within ~1.6 dot-widths centre to centre
+const TOUCH_HAND = 0.30;  // ...or within 30% of hand size (helps when your hand is close to the camera)
+const RELEASE = 1.7;      // must move apart 1.7x the touch distance before it can fire again
+const COOLDOWN = 120;     // ms after a release before that hand can fire again
+const FINGERS = [8, 12, 16, 20]; // all four compete, even ones without a word (stops pinky triggering ring)
+
+import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+
+const $ = id => document.getElementById(id);
+const v = $('v'), c = $('c'), g = c.getContext('2d'), msg = $('msg');
+const WORDS = [...Object.values(HAND_A), ...Object.values(HAND_B)].map(w => w[0]);
+let swapped = false, aspect = '16:9', hands, micStream, micSrc, micOnly = null, facing = 'user', mirror = true;
+const smooth = {}, flash = {};
+const MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
+const RES = MOBILE ? { width: { ideal: 1280 }, height: { ideal: 720 } } : { width: { ideal: 1920 }, height: { ideal: 1080 } };
+const handState = {};   // label -> { active, cand, count, releasedAt, d:{} }
+let sens = 1, debug = false;
+
+// ---------- audio ----------
+const actx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+const recDest = actx.createMediaStreamDestination();
+// limiter: stops crackle when two words overlap
+const master = actx.createDynamicsCompressor();
+master.threshold.value = -6; master.knee.value = 0; master.ratio.value = 20; master.attack.value = 0.002; master.release.value = 0.1;
+master.connect(actx.destination); master.connect(recDest);
+const micGain = actx.createGain(); micGain.gain.value = 0; micGain.connect(recDest);
+const buffers = {};   // word -> AudioBuffer (user's own voice)
+
+function say(word) {
+  const b = buffers[word];
+  if (b) {
+    const s = actx.createBufferSource(); s.buffer = b;
+    s.connect(master); s.start(0);
+  } else if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word); u.rate = 1.05; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  }
+}
+
+function trimSilence(buf) {
+  const d = buf.getChannelData(0), th = 0.02; let a = 0, z = d.length - 1;
+  while (a < d.length && Math.abs(d[a]) < th) a++;
+  while (z > a && Math.abs(d[z]) < th) z--;
+  a = Math.max(0, a - buf.sampleRate * 0.01); z = Math.min(d.length, z + buf.sampleRate * 0.08);
+  if (z - a < 200) return buf;
+  const out = actx.createBuffer(buf.numberOfChannels, z - a, buf.sampleRate);
+  let peak = 0;
+  for (let ch = 0; ch < buf.numberOfChannels; ch++) { const seg = buf.getChannelData(ch).slice(a, z); for (const v of seg) peak = Math.max(peak, Math.abs(v)); }
+  const gain = peak > 0 ? Math.min(4, 0.8 / peak) : 1;
+  for (let ch = 0; ch < buf.numberOfChannels; ch++) out.copyToChannel(buf.getChannelData(ch).slice(a, z).map(v => v * gain), ch);
+  return out;
+}
+async function loadBlob(word, blob, save = true) {
+  const buf = trimSilence(await actx.decodeAudioData(await blob.arrayBuffer()));
+  buffers[word] = buf;
+  if (save) try {
+    const r = new FileReader();
+    r.onload = () => { try { localStorage.setItem('fingerword:' + word, r.result); } catch {} };
+    r.readAsDataURL(blob);
+  } catch {}
+  renderRows();
+}
+async function restoreSaved() {
+  for (const w of WORDS) {
+    try {
+      const d = localStorage.getItem('fingerword:' + w);
+      if (d) await loadBlob(w, await (await fetch(d)).blob(), false);
+    } catch {}
+  }
+}
+
+function renderRows() {
+  $('rows').innerHTML = WORDS.map(w => {
+    const col = [...Object.values(HAND_A), ...Object.values(HAND_B)].find(x => x[0] === w)[1];
+    return `<div class="row"><span class="w" style="color:${col}">${w}</span>
+      <span class="tag">${buffers[w] ? 'my voice' : 'browser'}</span>
+      <button data-play="${w}">▶</button><button data-rec="${w}">●</button>
+      <button data-up="${w}">⤒</button>${buffers[w] ? `<button data-clr="${w}">✕</button>` : ''}</div>`;
+  }).join('');
+}
+
+let clipRec = null;
+$('rows').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  actx.resume();
+  if (b.dataset.play) say(b.dataset.play);
+  if (b.dataset.clr) { delete buffers[b.dataset.clr]; try { localStorage.removeItem('fingerword:' + b.dataset.clr); } catch {} renderRows(); }
+  if (b.dataset.up) {
+    const inp = Object.assign(document.createElement('input'), { type: 'file', accept: 'audio/*,video/*' });
+    inp.onchange = () => inp.files[0] && loadBlob(b.dataset.up, inp.files[0]).catch(() => alertMsg('Could not read that file'));
+    inp.click();
+  }
+  if (b.dataset.rec) {
+    if (clipRec) { clipRec.stop(); return; }
+    const word = b.dataset.rec, chunks = [];
+    let m; try { m = await getMic(); } catch (err) { alertMsg('Mic blocked: ' + err.message); return; }
+    clipRec = new MediaRecorder(m);
+    clipRec.ondataavailable = ev => ev.data.size && chunks.push(ev.data);
+    clipRec.onstop = () => { clipRec = null; releaseMic(); loadBlob(word, new Blob(chunks, { type: chunks[0]?.type })).catch(() => alertMsg('Recording failed, try again')); };
+    clipRec.start(); b.classList.add('recording'); b.textContent = '■';
+    setTimeout(() => clipRec && clipRec.state === 'recording' && clipRec.stop(), 1500);
+  }
+});
+function alertMsg(t) { msg.textContent = t; setTimeout(() => msg.textContent = '', 3000); }
+
+// ---------- microphone (only open while needed: an open mic puts speakers in laggy "call mode") ----------
+async function getMic() {
+  if (micOnly && micOnly.getAudioTracks()[0]?.readyState === 'live') return micOnly;
+  micOnly = await navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+  if (micSrc) micSrc.disconnect();
+  micSrc = actx.createMediaStreamSource(micOnly); micSrc.connect(micGain);
+  actx.resume();
+  return micOnly;
+}
+function releaseMic() {
+  if ($('micmix').checked) return;
+  if (micOnly) micOnly.getTracks().forEach(tr => tr.stop());
+  micOnly = null;
+  if (micSrc) { micSrc.disconnect(); micSrc = null; }
+  setTimeout(() => actx.resume(), 50);
+}
+
+// ---------- camera ----------
+async function startCamera(deviceId) {
+  if (micStream) micStream.getTracks().forEach(tr => tr.stop());
+  const video = deviceId
+    ? { deviceId: { exact: deviceId }, ...RES }
+    : { facingMode: { ideal: facing }, ...RES };
+  micStream = await navigator.mediaDevices.getUserMedia({ video, audio: false });
+  v.srcObject = micStream; await v.play();
+  const vt = micStream.getVideoTracks()[0], set = vt.getSettings();
+  // front camera = mirrored selfie view; back camera = normal view
+  const label = (vt.label || '').toLowerCase();
+  if (set.facingMode) mirror = set.facingMode === 'user';
+  else if (/back|rear|environment/.test(label)) mirror = false;
+  else if (/front|facetime|user/.test(label)) mirror = true;
+  else mirror = facing === 'user';
+  actx.resume();
+  for (const k in smooth) delete smooth[k];
+  for (const k in handState) delete handState[k];
+  return vt;
+}
+
+async function flipCamera() {
+  const before = micStream?.getVideoTracks()[0]?.getSettings().deviceId;
+  facing = facing === 'user' ? 'environment' : 'user';
+  try {
+    const vt = await startCamera();
+    // laptops often ignore facingMode: fall back to cycling through the cameras
+    if (vt.getSettings().deviceId === before) {
+      const cams = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+      if (cams.length > 1) {
+        const i = cams.findIndex(d => d.deviceId === before);
+        await startCamera(cams[(i + 1) % cams.length].deviceId);
+      } else alertMsg('Only one camera found on this device');
+    }
+  } catch (e) { alertMsg('Could not switch camera: ' + e.message); }
+}
+
+// ---------- start ----------
+$('go').onclick = async () => {
+  $('go').disabled = true; $('go').textContent = 'Loading…';
+  actx.resume();
+  try {
+    await startCamera();
+  } catch (e) { $('go').textContent = 'Camera blocked: open in Chrome and allow the camera'; return; }
+  const fs = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  hands = await HandLandmarker.createFromOptions(fs, {
+    baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
+    runningMode: 'VIDEO', numHands: 2, minHandDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+  await restoreSaved(); renderRows();
+  $('start').remove();
+  alertMsg('Pinch a fingertip to your thumb ✋');
+  frame();
+};
+
+// ---------- render loop ----------
+function layout() {
+  const vw = v.videoWidth, vh = v.videoHeight; let cw, ch, sx = 0, sy = 0, sw = vw, sh = vh;
+  if (aspect === '9:16') { ch = vh; cw = Math.round(vh * 9 / 16); sw = cw; sx = (vw - sw) / 2; } else { cw = vw; ch = vh; }
+  if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+  return { vw, vh, sx, sy, sw, sh, cw, ch };
+}
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+let last = -1, lastRes = null;
+function frame() {
+  requestAnimationFrame(frame);
+  if (v.readyState < 2) return;
+  const L = layout();
+  g.save(); if (mirror) { g.translate(L.cw, 0); g.scale(-1, 1); }
+  g.drawImage(v, L.sx, L.sy, L.sw, L.sh, 0, 0, L.cw, L.ch); g.restore();
+
+  const t = performance.now();
+  let res = lastRes;
+  if (t > last && !(MOBILE && t - last < 30)) { res = hands.detectForVideo(v, t); lastRes = res; last = t; }
+  if (!res) return;
+  const ref = Math.min(L.cw, L.ch * 16 / 9) / 1290 * 1.2;
+  const dotR = 9.5 * ref, fontPx = 40 * ref, lift = 14 * ref;
+  const seen = new Set();
+
+  res.landmarks.forEach((lm, i) => {
+    // MediaPipe labels assume a mirrored image; we feed the raw camera, so "Right" = your left hand.
+    const label = res.handednesses[i]?.[0]?.categoryName || 'Right';
+    seen.add(label);
+    let words = (label === 'Right') ? HAND_A : HAND_B;
+    if (swapped) words = (words === HAND_A) ? HAND_B : HAND_A;
+    // ---- pinch detection on screen: when the thumb dot and a finger dot touch ----
+    const toPx = p => {
+      const x = mirror ? (1 - p.x) * L.vw - (L.vw - L.sx - L.sw) : p.x * L.vw - L.sx, y = p.y * L.vh - L.sy;
+      return { x: x * L.cw / L.sw, y: y * L.ch / L.sh };
+    };
+    const st = handState[label] || (handState[label] = { active: null, releasedAt: -1e9, d: {} });
+    const thumb = toPx(lm[4]);
+    const handPx = dist(toPx(lm[0]), toPx(lm[9]));
+    const on = Math.max(TOUCH_DOTS * dotR, TOUCH_HAND * handPx) * sens;
+    const off = on * RELEASE;
+    const ds = FINGERS.map(k => { const q = toPx(lm[k]); st.d[k] = Math.hypot(q.x - thumb.x, q.y - thumb.y); return [k, st.d[k]]; })
+      .sort((a, b) => a[1] - b[1]);
+    const [bestK, bestD] = ds[0];
+
+    if (st.active != null) {
+      if (st.d[st.active] > off) { st.active = null; st.releasedAt = t; }
+    } else if (t - st.releasedAt > COOLDOWN && bestD < on) {
+      st.active = bestK;                       // only the closest finger fires, once, until you let go
+      const w = words[bestK];
+      if (w) { say(w[0]); flash[label + bestK] = t; }
+    }
+
+    const s = smooth[label] || (smooth[label] = {});
+    TIPS.forEach(k => {
+      const p = lm[k];
+      let x = mirror ? (1 - p.x) * L.vw - (L.vw - L.sx - L.sw) : p.x * L.vw - L.sx, y = p.y * L.vh - L.sy;
+      x = x * L.cw / L.sw; y = y * L.ch / L.sh;
+      const o = s[k]; if (o) { x = o.x + (x - o.x) * 0.6; y = o.y + (y - o.y) * 0.6; }
+      s[k] = { x, y };
+
+      const w = words[k];
+      if (debug && st.active === k) { g.beginPath(); g.arc(x, y, dotR * 2.2, 0, Math.PI * 2); g.strokeStyle = '#fff'; g.lineWidth = 3 * ref; g.stroke(); }
+
+      g.beginPath(); g.arc(x, y, dotR, 0, Math.PI * 2); g.fillStyle = DOT; g.fill();
+      if (w) {
+        const key = label + k, age = t - (flash[key] || -1e9);
+        const pop = $('showpinch').checked && age < 250 ? 1 + 0.25 * (1 - age / 250) : 1;
+        g.font = `italic ${fontPx * pop}px Arial, Helvetica, sans-serif`;
+        g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+        g.fillStyle = w[1]; g.fillText(w[0], x, y - lift);
+      }
+    });
+    if (debug) {
+      const tx = s[4].x, ty = s[4].y;
+      g.font = `${22 * ref}px Arial`; g.fillStyle = '#fff'; g.textAlign = 'center';
+      g.fillText(ds.map(([k, d]) => ({ 8: 'idx', 12: 'mid', 16: 'ring', 20: 'pnk' })[k] + ' ' + (d / on).toFixed(2)).join('  ') + '   (fires below 1.00)', tx, ty + 40 * ref);
+    }
+  });
+  // forget hands that left the frame
+  for (const label in handState) if (!seen.has(label)) delete handState[label];
+}
+
+// ---------- keep audio alive on phones ----------
+actx.onstatechange = () => { if (actx.state !== 'running') actx.resume().catch(() => {}); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) actx.resume().catch(() => {}); });
+addEventListener('touchend', () => actx.resume().catch(() => {}), { passive: true });
+
+// ---------- controls ----------
+$('swap').onclick = () => { swapped = !swapped; };
+$('flip').onclick = () => { actx.resume(); flipCamera(); };
+$('aspect').onchange = e => { aspect = e.target.value; };
+$('sounds').onclick = () => $('panel').classList.toggle('open');
+$('hideui').onclick = () => document.body.classList.add('hide');
+$('micmix').onchange = async e => {
+  micGain.gain.value = e.target.checked ? 1 : 0;
+  if (e.target.checked) { try { await getMic(); } catch (err) { e.target.checked = false; alertMsg('Mic blocked: ' + err.message); } }
+  else releaseMic();
+};
+$('debug').onchange = e => { debug = e.target.checked; };
+$('sens').oninput = e => { sens = +e.target.value; try { localStorage.setItem('fingerword:sens3', sens); } catch {} };
+try { const sv = localStorage.getItem('fingerword:sens3'); if (sv) { sens = +sv; $('sens').value = sv; } } catch {}
+addEventListener('keydown', e => { if (e.key.toLowerCase() === 'h') document.body.classList.toggle('hide'); });
+
+let rec = null, chunks = [];
+const recBtn = $('rec'), dl = $('dl');
+recBtn.onclick = () => {
+  if (rec) { rec.stop(); return; }
+  actx.resume();
+  const out = c.captureStream(30);
+  recDest.stream.getAudioTracks().forEach(tr => out.addTrack(tr));
+  const type = ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t));
+  rec = new MediaRecorder(out, { mimeType: type, videoBitsPerSecond: MOBILE ? 6e6 : 12e6 });
+  chunks = []; rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  rec.onstop = () => {
+    const blob = new Blob(chunks, { type: rec.mimeType });
+    dl.href = URL.createObjectURL(blob);
+    dl.download = 'dont-forget-to-love-yourself.' + (rec.mimeType.includes('mp4') ? 'mp4' : 'webm');
+    dl.style.display = 'inline-block';
+    rec = null; recBtn.classList.remove('on'); recBtn.textContent = '● Record';
+  };
+  rec.start(); recBtn.classList.add('on'); recBtn.textContent = '■ Stop'; dl.style.display = 'none';
+};
+renderRows();
+</script>
+</body>
+</html>

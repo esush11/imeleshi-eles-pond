@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>魚缸 · the fish tank</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Cormorant+Garamond:ital,wght@1,500&family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: late-night Hong Kong, a fish shop's hum, dreamy and a little lonely
+   IDEA: your laptop becomes a glowing aquarium; poke the glass and it ripples; you can stand behind the glass
+   PICTURE: neon-lit goldfish drifting past your face, bokeh lights, soft bloom, film grain
+   COLOUR and TYPE: mood-lit water, goldfish orange, subtitle yellow; Noto Serif TC + Cormorant + DM Mono
+   LAYOUT: full-bleed tank, quiet glass pills along the bottom, film subtitles low centre */
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;overflow:hidden;background:#05070d;color:#eef3f6;font:13px/1.4 "DM Mono",ui-monospace,monospace;-webkit-user-select:none;user-select:none}
+#gl,#c2{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:pointer}
+#c2{display:none}
+#cam{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
+.bar{position:fixed;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:0 14px;transition:opacity .5s;z-index:3}
+.bar button,.bar label{font:500 12px "DM Mono",monospace;letter-spacing:.02em;color:#eef6f3;background:rgba(12,16,30,.38);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(230,240,255,.22);border-radius:999px;min-height:38px;padding:0 14px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.bar button:hover{background:rgba(40,50,80,.55)}
+.bar button.on{border-color:rgba(255,226,120,.7);color:#ffe78a}
+.bar button:focus-visible{outline:2px solid #ffe78a;outline-offset:2px}
+.bar input[type=range]{accent-color:#ffe78a;width:80px}
+#rec.live{background:#b3262e;border-color:#ff8b8b;color:#fff}
+#dl{display:none}
+#sub{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);text-align:center;color:#ffe33a;text-shadow:0 0 2px #000,0 1px 3px #000,0 0 14px rgba(0,0,0,.6);pointer-events:none;opacity:0;transition:opacity 1.2s;z-index:2;width:min(90vw,900px)}
+#sub .zh{font:500 clamp(18px,2.4vw,30px)/1.35 "Noto Sans TC",sans-serif;letter-spacing:.06em}
+#sub .en{font:500 clamp(14px,1.7vw,21px)/1.35 Arial,Helvetica,sans-serif;margin-top:2px}
+#hint{position:fixed;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(8,10,20,.45);border:1px solid rgba(230,240,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:opacity 1.2s;z-index:3;white-space:nowrap;max-width:calc(100vw - 30px);overflow:hidden;text-overflow:ellipsis}
+#toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);padding:9px 14px;border-radius:12px;background:rgba(8,10,20,.85);display:none;z-index:4;max-width:calc(100vw - 30px);text-align:center}
+#handdot{position:fixed;top:max(16px,env(safe-area-inset-top));right:16px;padding:6px 12px;border-radius:999px;background:rgba(8,10,20,.45);border:1px solid rgba(230,240,255,.18);display:none;z-index:3;font-size:11px}
+body.clean .bar,body.clean #hint,body.clean #handdot{opacity:0;pointer-events:none}
+body.clean #gl,body.clean #c2{cursor:none}
+#start{position:fixed;inset:0;z-index:6;display:grid;place-items:center;padding:24px;background:radial-gradient(110% 80% at 50% 10%,#2a1f58 0%,#120d2c 55%,#05060e 100%);transition:opacity .9s}
+#start.gone{opacity:0;pointer-events:none}
+.card{position:relative;z-index:1;text-align:center;max-width:520px}
+.card h1{font:700 clamp(80px,16vw,150px)/1 "Noto Serif TC",serif;margin:0;color:#ff9d4a;text-shadow:0 0 40px rgba(255,120,60,.55),0 0 90px rgba(255,80,160,.3);letter-spacing:.08em}
+.card h2{font:italic 500 clamp(26px,4vw,38px)/1.1 "Cormorant Garamond",serif;margin:6px 0 18px;color:#eef0ff}
+.card p{margin:0 auto 22px;max-width:400px;color:#c4c6e0;font-size:13px;line-height:1.7}
+#go{font:500 14px "DM Mono",monospace;letter-spacing:.04em;background:#ffe33a;color:#17142b;border:0;border-radius:999px;min-height:50px;padding:0 28px;cursor:pointer}
+#go:hover{background:#fff07a}
+.card small{display:block;margin-top:16px;color:#9a9cc0;font-size:11px}
+@media(max-width:640px){.bar button,.bar label{min-height:36px;padding:0 11px;font-size:11px}#hint{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#start,.bar,#hint,#sub{transition:none}}
+</style>
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<canvas id="c2"></canvas>
+<div id="sub"><div class="zh"></div><div class="en"></div></div>
+<div id="hint">poke the glass · space to feed · M changes the light · S takes a picture · H hides controls</div>
+<div id="handdot">no hand seen</div>
+<div id="toast"></div>
+<div id="flash" style="position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:5;transition:opacity .45s"></div>
+
+<div class="bar" id="bar">
+  <button id="me">you behind the glass: off</button>
+  <button id="room">room: showing</button>
+  <button id="handb">hand play: off</button>
+  <button id="mood">light: chungking green</button>
+  <label>glow <input id="glow" type="range" min="0" max="2" step="0.05" value="0.8" aria-label="Glow"></label>
+  <button id="feed">feed</button>
+  <button id="step">step-print: off</button>
+  <button id="subs">subtitles: off</button>
+  <button id="snd" class="on">sound: on</button>
+  <button id="shot" aria-label="Take a picture" title="Take a picture (S)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg></button>
+  <button id="rec">● record</button>
+  <a id="dl"><button>⬇ save clip</button></a>
+  <button id="full">full screen</button>
+  <button id="hide">hide (H)</button>
+</div>
+
+<div id="start">
+  <div class="card">
+    <h1>魚缸</h1>
+    <h2>the fish tank</h2>
+    <p>Poke the glass and the water ripples. The fish dart away, then drift back. Turn on "you behind the glass" to stand on the other side of the tank.</p>
+    <button id="go">turn on the tank</button>
+    <small>Everything runs in your browser. The camera is only used if you turn on "you behind the glass" or "hand play".</small>
+  </div>
+</div>
+
+<script>
+'use strict';
+{
+const $=id=>document.getElementById(id);
+const TAU=Math.PI*2;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const mix3=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)];
+const rgba=(c,a=1)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+
+/* ---------------- lighting moods ---------------- */
+// water/deep: tank colour · tube/shaft: lights · fishTint+fishAmt: how the light colours the fish
+// camLow/camHigh: duotone for you behind the glass (shadows → highlights) · bokeh: background light colours
+const MOODS=[
+  {name:'chungking green',water:[34,78,60],deep:[6,22,17],tube:[200,255,225],shaft:[170,255,205],fishTint:[230,255,150],fishAmt:0.2,camLow:[6,26,20],camHigh:[205,255,215],lightA:[170,255,200],lightB:[255,210,150],bokeh:[[255,170,90],[120,255,190],[90,200,255]],lift:[0.02,0.06,0.045],gain:[0.95,1.06,0.92],gamma:1.04,sat:0.9},
+  {name:'neon pink',water:[46,22,82],deep:[14,6,34],tube:[255,140,230],shaft:[235,150,255],fishTint:[255,120,170],fishAmt:0.07,camLow:[26,10,58],camHigh:[255,175,225],lightA:[255,135,205],lightB:[130,105,255],bokeh:[[110,255,200],[200,90,255],[90,190,255]],lift:[0.05,0.02,0.08],gain:[1.05,0.94,1.06],gamma:1.0,sat:1.1},
+  {name:'blacklight blue',water:[12,32,118],deep:[4,10,48],tube:[160,200,255],shaft:[150,190,255],fishTint:[215,245,255],fishAmt:0.75,camLow:[6,14,70],camHigh:[150,200,255],lightA:[110,160,255],lightB:[150,110,255],bokeh:[[255,80,220],[120,255,140],[255,150,80]],lift:[0.01,0.03,0.09],gain:[0.88,1.0,1.1],gamma:1.0,sat:1.12},
+  {name:'jade',water:[14,70,40],deep:[3,22,12],tube:[160,255,190],shaft:[150,255,180],fishTint:[220,255,130],fishAmt:0.6,camLow:[6,30,18],camHigh:[170,255,190],lightA:[140,255,170],lightB:[90,180,255],bokeh:[[90,140,255],[255,120,200],[255,220,120]],lift:[0.01,0.05,0.03],gain:[0.9,1.06,0.92],gamma:1.0,sat:1.1},
+  {name:'goldfish glow',water:[24,22,62],deep:[8,7,24],tube:[255,210,170],shaft:[255,200,170],fishTint:[255,140,40],fishAmt:0.12,camLow:[28,16,44],camHigh:[255,210,170],lightA:[255,195,130],lightB:[90,200,180],bokeh:[[70,120,255],[255,90,110],[120,255,170]],lift:[0.04,0.03,0.05],gain:[1.06,0.99,0.95],gamma:1.02,sat:1.08},
+  {name:'magenta haze',water:[78,10,88],deep:[20,3,30],tube:[255,90,230],shaft:[255,100,240],fishTint:[255,100,215],fishAmt:0.6,camLow:[34,6,54],camHigh:[255,100,215],lightA:[255,90,215],lightB:[170,70,255],bokeh:[[90,255,220],[255,210,90],[110,140,255]],lift:[0.07,0.01,0.07],gain:[1.08,0.88,1.05],gamma:1.0,sat:1.12},
+  {name:'aqua',water:[18,92,104],deep:[4,28,38],tube:[185,255,255],shaft:[160,250,255],fishTint:[190,255,230],fishAmt:0.5,camLow:[6,34,42],camHigh:[170,255,240],lightA:[130,255,235],lightB:[90,170,255],bokeh:[[255,170,90],[255,120,210],[150,255,150]],lift:[0.01,0.05,0.07],gain:[0.9,1.04,1.03],gamma:0.98,sat:1.02}
+];
+let moodI=0;
+const M=JSON.parse(JSON.stringify(MOODS[0]));
+function easeMood(dt){
+  const T=MOODS[moodI],k=Math.min(1,dt*1.6);
+  for(const key in T){
+    if(key==='bokeh')for(let i=0;i<3;i++)M.bokeh[i]=mix3(M.bokeh[i],T.bokeh[i],k);
+    else if(Array.isArray(T[key]))M[key]=mix3(M[key],T[key],k);
+    else if(typeof T[key]==='number')M[key]=lerp(M[key],T[key],k);
+  }
+}
+
+/* ---------------- canvases ---------------- */
+const glc=$('gl'),c2=$('c2');
+const scene=document.createElement('canvas'),sx=scene.getContext('2d');
+const front=document.createElement('canvas'),fcx=front.getContext('2d');
+const gravelC=document.createElement('canvas');
+const plantC=document.createElement('canvas'),px=plantC.getContext('2d');
+const farC=document.createElement('canvas'),fxc=farC.getContext('2d'),nearC=document.createElement('canvas'),nxc=nearC.getContext('2d');
+const KF=1/3,KN=0.4;
+let W=0,H=0,SW=0,SH=0,RW=0,RH=0;
+let surfY=0,floorY=0;
+
+/* ---------------- ripple field ---------------- */
+let GW=200,GH=112,ra=null,rb=null,r8=null;
+function makeRipple(){GW=200;GH=Math.max(50,Math.round(GW*H/W));ra=new Float32Array(GW*GH);rb=new Float32Array(GW*GH);r8=new Uint8Array(GW*GH);}
+function rippleStep(){
+  const damp=0.982;
+  for(let y=1;y<GH-1;y++){const row=y*GW;for(let x=1;x<GW-1;x++){const i=row+x;rb[i]=((ra[i-1]+ra[i+1]+ra[i-GW]+ra[i+GW])*0.5-rb[i])*damp;}}
+  const t=ra;ra=rb;rb=t;
+}
+function drop(x_,y_,radius,strength){
+  const gx=x_/SW*GW,gy=y_/SH*GH,r=Math.max(1.2,radius/SW*GW);
+  const x0=Math.max(1,Math.floor(gx-r)),x1=Math.min(GW-2,Math.ceil(gx+r)),y0=Math.max(1,Math.floor(gy-r)),y1=Math.min(GH-2,Math.ceil(gy+r));
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const d=Math.hypot(x-gx,y-gy);if(d<=r)ra[y*GW+x]+=strength*Math.cos(d/r*Math.PI/2);}
+}
+
+/* ---------------- WebGL ---------------- */
+let gl=null,P={},quad,texFront,fishFar,fishMid,fishNear,fishAll,texScene,texRip,texCam,texMask,mainA,mainB,b4A,b4B,b8A,b8B;
+const VS=`attribute vec2 p;varying vec2 v;void main(){v=p*0.5+0.5;gl_Position=vec4(p,0.,1.);}`;
+const FS_COMP=`precision mediump float;
+varying vec2 v;
+uniform sampler2D uScene,uRip,uPrev,uCam,uMask,uFront,uFish;
+uniform vec2 uRT,uCamFrac;uniform float uT,uMix,uWeave,uCamOn,uMaskOn,uExpo;
+uniform vec3 uLift,uGain,uSpec,uDeep,uCamLow,uCamHigh,uLightA,uLightB;uniform float uGamma,uSat;
+const vec3 LW=vec3(0.299,0.587,0.114);
+void main(){
+  vec2 uv=v+vec2(sin(uT*1.7)*0.0006,cos(uT*1.1)*0.0008)*uWeave;
+  float hL=texture2D(uRip,uv-vec2(uRT.x,0.)).r,hR=texture2D(uRip,uv+vec2(uRT.x,0.)).r;
+  float hU=texture2D(uRip,uv+vec2(0.,uRT.y)).r,hD=texture2D(uRip,uv-vec2(0.,uRT.y)).r;
+  vec2 g=vec2(hR-hL,hU-hD);
+  vec2 off=g*0.32+vec2(sin(uv.y*22.+uT*0.9),cos(uv.x*17.+uT*0.7))*0.001;
+  vec2 su=uv+off,d=uv-0.5;float ab=0.0016+length(g)*0.02;
+  vec4 s;s.r=texture2D(uScene,su+d*ab).r;s.g=texture2D(uScene,su).g;s.b=texture2D(uScene,su-d*ab).b;s.a=texture2D(uScene,su).a;
+  // you, behind the glass: mirrored, soft focus, shadows crushed, lit by the tank light
+  vec2 cu=vec2(1.-su.x,su.y);cu=0.5+(cu-0.5)*uCamFrac;
+  vec3 cm=texture2D(uCam,cu).rgb*0.36+(texture2D(uCam,cu+vec2(0.0035,0.)).rgb+texture2D(uCam,cu-vec2(0.0035,0.)).rgb+texture2D(uCam,cu+vec2(0.,0.005)).rgb+texture2D(uCam,cu-vec2(0.,0.005)).rgb)*0.16;
+  cm*=uExpo;
+  float l=dot(cm,LW);
+  vec3 light=mix(uLightA,uLightB,smoothstep(0.1,0.9,v.x+0.1*sin(uT*0.13)));
+  light*=0.38+0.72*smoothstep(1.0,0.12,length((v-vec2(0.5,0.56))*vec2(1.3,1.)));
+  vec3 lit=cm*light*1.4;
+  vec3 duo=mix(uCamLow,uCamHigh,smoothstep(0.02,0.9,l));
+  vec3 cc=min(mix(lit,duo,0.28),vec3(1.));
+  cc=uCamLow*0.85+cc*(1.-uCamLow*0.85);
+  cc=mix(cc,cc*cc*(3.-2.*cc),0.35);
+  float m=mix(1.,smoothstep(0.3,0.8,texture2D(uMask,cu).r),uMaskOn);
+  vec3 camc=mix(cc*0.25+uCamLow*0.4,cc,m);
+  vec3 base=mix(uDeep,camc,uCamOn);
+  vec3 c=mix(base,s.rgb,s.a);
+  vec4 fa=texture2D(uFish,su);c=c*(1.-fa.a)+fa.rgb;
+  vec4 sf=texture2D(uFront,su);c=mix(c,sf.rgb,sf.a);
+  float gm=length(g),dirl=dot(g/(gm+1e-4),vec2(-0.6,0.8)),ring=pow(clamp(gm*5.,0.,1.),1.4);
+  c+=ring*(0.35+0.65*max(dirl,0.))*uSpec*0.45;
+  c*=1.-ring*max(-dirl,0.)*0.3;
+  c=pow(max(c,0.),vec3(uGamma));
+  float lc=dot(c,LW);c=mix(vec3(lc),c,uSat);
+  c=c*uGain+uLift*(1.-c);
+  gl_FragColor=vec4(mix(c,texture2D(uPrev,v).rgb,uMix),1.);
+}`;
+const FS_BRIGHT=`precision mediump float;varying vec2 v;uniform sampler2D uTex,uFish,uFront;uniform vec2 uTx;
+vec3 tp(vec2 o){vec2 q=v+uTx*o;vec4 t=texture2D(uTex,q);vec3 c=t.rgb*t.a;vec4 f=texture2D(uFish,q);c=c*(1.-f.a)+f.rgb;vec4 r=texture2D(uFront,q);return mix(c,r.rgb,r.a);}
+void main(){
+  vec3 c=(tp(vec2(-1.,-1.))+tp(vec2(1.,-1.))+tp(vec2(-1.,1.))+tp(vec2(1.,1.)))*0.25;
+  float l=dot(c,vec3(0.299,0.587,0.114));float w=smoothstep(0.32,1.,l);
+  gl_FragColor=vec4(c*(0.06+w*0.7),1.);
+}`;
+const FS_BLUR=`precision mediump float;varying vec2 v;uniform sampler2D uTex;uniform vec2 uDir;
+void main(){
+  vec3 c=texture2D(uTex,v).rgb*0.227;
+  c+=(texture2D(uTex,v+uDir*1.385).rgb+texture2D(uTex,v-uDir*1.385).rgb)*0.316;
+  c+=(texture2D(uTex,v+uDir*3.23).rgb+texture2D(uTex,v-uDir*3.23).rgb)*0.07;
+  gl_FragColor=vec4(c,1.);
+}`;
+const FS_OUT=`precision mediump float;
+varying vec2 v;uniform sampler2D uMain,uB4,uB8;uniform float uT,uGrain,uFlick,uGlow;uniform vec2 uRes;
+float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
+void main(){
+  vec3 c=texture2D(uMain,v).rgb;
+  vec3 b4=texture2D(uB4,v).rgb,b8=texture2D(uB8,v).rgb;
+  c+=(b4*0.6+b8*0.75)*uGlow;
+  c+=b8*vec3(0.16,0.05,0.04)*uGlow;
+  c=c/(1.+c*0.4)*1.2;
+  vec2 d=v-0.5;
+  c*=mix(0.45,1.,smoothstep(0.95,0.25,length(d*vec2(1.05,1.25))));
+  c*=uFlick;
+  float n=h(floor(v*uRes/1.5)+fract(uT*7.13)*vec2(91.7,37.3))-0.5;
+  c+=n*uGrain*(1.15-dot(c,vec3(0.33)));
+  c+=smoothstep(0.55,1.,v.x+0.15*sin(uT*0.21))*0.04*(0.6+0.4*sin(uT*0.37))*vec3(1.,0.55,0.3);
+  gl_FragColor=vec4(c,1.);
+}`;
+const VS_FISH=`attribute vec3 aP,aN;attribute vec2 aUV;attribute float aPart;
+uniform vec2 uPos,uScale;uniform float uYaw,uPitch,uPh,uAmp,uDepth,uTail;
+varying vec3 vN,vL;varying vec2 vUV;varying float vPart;
+void main(){
+  vec3 p=aP,n=aN;
+  if(aPart>0.5&&aPart<1.5)p.x=-0.19+(p.x+0.19)*uTail/0.8;
+  float along=clamp((0.42-p.x)/1.25,0.,1.);
+  float w=sin(uPh-along*4.2);
+  p.z+=w*uAmp*along*along*0.55;
+  n.x-=cos(uPh-along*4.2)*uAmp*along*0.9*sign(n.z+1e-4)*0.5;
+  if(aPart>0.5&&aPart<1.5){p.z+=sin(uPh*1.25-aUV.x*6.5+aUV.y*1.8)*0.12*aUV.x;p.y+=sin(uPh*0.9-aUV.x*4.)*0.03*aUV.x*aUV.y;}
+  else if(aPart>1.5&&aPart<2.5)p.z+=sin(uPh*0.9-aUV.x*3.)*0.035*aUV.y;
+  else if(aPart>2.5&&aPart<3.5)p.z+=sin(uPh*1.1+aUV.x*2.)*0.03*aUV.y;
+  else if(aPart>3.5)p.z+=sign(p.z)*aUV.y*0.07*(sin(uPh*1.6)*0.5+0.3);
+  vL=aP;vUV=aUV;vPart=aPart;
+  float cp=cos(uPitch),sp=sin(uPitch),cy=cos(uYaw),sy=sin(uYaw);
+  vec3 q=vec3(p.x*cp-p.y*sp,p.x*sp+p.y*cp,p.z);
+  vec3 m=vec3(n.x*cp-n.y*sp,n.x*sp+n.y*cp,n.z);
+  q=vec3(q.x*cy+q.z*sy,q.y,-q.x*sy+q.z*cy);
+  m=vec3(m.x*cy+m.z*sy,m.y,-m.x*sy+m.z*cy);
+  vN=m;
+  float pf=1./(1.-q.z*0.35);
+  gl_Position=vec4(uPos+q.xy*uScale*pf,uDepth-q.z*0.03,1.);
+}`;
+const FS_FISH=`#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec3 vN,vL;varying vec2 vUV;varying float vPart;
+uniform vec3 uC1,uC2,uSpotC,uLA,uLB,uAmb;uniform float uSpots,uSeed,uFog,uPearl;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+void main(){
+  vec3 n=normalize(vN);if(!gl_FrontFacing)n=-n;
+  vec3 V=vec3(0.,0.,1.),L1=normalize(vec3(-0.35,0.85,0.45)),L2=normalize(vec3(0.7,-0.15,0.6)),H=normalize(L1+V);
+  float fr=pow(1.-abs(n.z),2.2);
+  vec3 col;float a=1.;
+  if(vPart<0.5){
+    float cv=cos(vUV.y*6.2832);
+    vec3 base=mix(uC2,uC1,smoothstep(-0.75,0.15,cv));
+    base*=mix(1.,0.7,smoothstep(0.55,1.,cv));
+    if(uSpots>0.5){float nn=noise(vec2(vUV.x*7.,vUV.y*9.)+uSeed)*0.7+noise(vec2(vUV.x*15.,vUV.y*18.)+uSeed*2.)*0.3;base=mix(base,uSpotC,smoothstep(0.5,0.56,nn));}
+    vec2 g=vec2(vUV.x*30.,vUV.y*36.);g.x+=step(1.,mod(g.y,2.))*0.5;
+    float se=smoothstep(0.3,0.48,length((fract(g)-0.5)*vec2(1.,1.3)));
+    float d1=max((dot(n,L1)+0.35)/1.35,0.),d2=max(dot(n,L2),0.),nh=max(dot(n,H),0.);
+    float sp=pow(nh,48.)*(0.45+0.9*se)+pow(nh,8.)*0.14;
+    col=base*(uAmb*0.45+uLA*d1*0.95+uLB*d2*0.45);
+    col*=1.-se*0.1;
+    col+=sp*mix(vec3(1.),uLA,0.4)*(0.65+uPearl*0.6);
+    col+=fr*(uLB*0.4+base*0.35)+base*0.2;
+    float ed=length(vL.xy-vec2(0.41,0.032));
+    if(abs(vL.z)>0.01&&ed<0.031){
+      vec3 eye=mix(vec3(0.015),vec3(0.7,0.5,0.2),smoothstep(0.017,0.021,ed));
+      eye+=pow(nh,30.)*0.9+fr*0.1;
+      col=mix(col,eye,smoothstep(0.031,0.027,ed));
+    }
+    float gd=abs(length(vL.xy-vec2(0.5,0.))-0.14);
+    if(vL.x<0.385)col*=1.-0.28*smoothstep(0.012,0.,gd);
+    col*=1.-0.25*smoothstep(0.02,0.,abs(vL.x-0.49)-0.0)*step(0.,-vL.y+0.04)*step(vL.y,0.06)*0.;
+  }else{
+    vec3 fc=mix(uC1,uC2,0.45);
+    float along=vUV.x,across=vUV.y;
+    float rays=vPart<1.5?abs(sin(across*20.+along*2.)):abs(sin(along*22.));
+    rays=smoothstep(0.88,1.,rays);
+    float d1=abs(dot(n,L1));
+    col=fc*(uAmb*0.4+uLA*(0.55+0.5*d1))*1.05;
+    col=mix(col,col*0.7,rays*0.3);
+    col+=pow(max(dot(n,H),0.),20.)*0.18*uLA+fr*0.08*uLB;
+    float edge=vPart<1.5?along:across;
+    a=(0.74-0.5*pow(edge,1.25))*(1.+rays*0.15);
+    col+=fc*0.22;
+    a*=smoothstep(1.,0.82,edge);
+  }
+  col=mix(col,uAmb,uFog);
+  gl_FragColor=vec4(col*a,a);
+}`;
+const FS_FCOMP=`precision mediump float;varying vec2 v;uniform sampler2D uFar,uMid,uNear;
+void main(){vec4 c=texture2D(uFar,v);vec4 m=texture2D(uMid,v);c=c*(1.-m.a)+m;vec4 n=texture2D(uNear,v);c=c*(1.-n.a)+n;gl_FragColor=c;}`;
+function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+function prog(fs,vs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs||VS));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.bindAttribLocation(p,0,vs?'aP':'p');if(vs){gl.bindAttribLocation(p,1,'aN');gl.bindAttribLocation(p,2,'aUV');gl.bindAttribLocation(p,3,'aPart');}gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));p.u={};return p;}
+function U(p,n){return p.u[n]!==undefined?p.u[n]:(p.u[n]=gl.getUniformLocation(p,n));}
+function mkTex(){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return t;}
+function mkFBD(w,h){const o=mkFB(w,h);const rb=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,rb);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,w,h);gl.bindFramebuffer(gl.FRAMEBUFFER,o.f);gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,rb);gl.bindFramebuffer(gl.FRAMEBUFFER,null);return o;}
+// one goldfish mesh, built once: rounded body + tail, dorsal, anal, pelvic and pectoral fins
+let meshVBO,meshIBO,bodyCount=0,finCount=0;
+function buildFishMesh(){
+  const V=[],I=[];
+  const sm=(a,b,x)=>{x=clamp((x-a)/(b-a));return x*x*(3-2*x);};
+  const hOf=u=>0.19*Math.sqrt(clamp(u/0.34))*(1-0.8*sm(0.35,1,u))+0.003;
+  function grid(nu,nv,fn,part,out){
+    const base=V.length/9,P=[];
+    for(let i=0;i<=nu;i++)for(let j=0;j<=nv;j++)P.push(fn(i/nu,j/nv));
+    for(let i=0;i<=nu;i++)for(let j=0;j<=nv;j++){
+      const p=P[i*(nv+1)+j],pu=P[Math.min(nu,i+1)*(nv+1)+j],pm=P[Math.max(0,i-1)*(nv+1)+j],qv=P[i*(nv+1)+Math.min(nv,j+1)],qm=P[i*(nv+1)+Math.max(0,j-1)];
+      const du=[pu[0]-pm[0],pu[1]-pm[1],pu[2]-pm[2]],dv=[qv[0]-qm[0],qv[1]-qm[1],qv[2]-qm[2]];
+      let n=[du[1]*dv[2]-du[2]*dv[1],du[2]*dv[0]-du[0]*dv[2],du[0]*dv[1]-du[1]*dv[0]];
+      let l=Math.hypot(n[0],n[1],n[2]);if(l<1e-9){n=[1,0,0];l=1;}n=n.map(x=>x/l);
+      if(out&&n[1]*p[1]+n[2]*p[2]<0)n=n.map(x=>-x);
+      V.push(p[0],p[1],p[2],n[0],n[1],n[2],i/nu,part===1?j/nv*2-1:j/nv,part);
+    }
+    for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=base+i*(nv+1)+j,b=a+nv+1;I.push(a,b,a+1,b,b+1,a+1);}
+  }
+  grid(34,26,(u,v)=>{const h=hOf(u),w=h*0.62,a=v*TAU,cy=Math.cos(a),sz=Math.sin(a);return[0.5-u*0.7,h*cy*(cy<0?1.12:1),w*sz];},0,true);
+  bodyCount=I.length;
+  grid(16,18,(s,t)=>{t=t*2-1;const Lt=0.8;return[-0.19-s*Lt*(0.55+0.45*Math.pow(Math.abs(t),0.8)),t*(0.03+s*Lt*0.55*(1-0.25*s*s)),0];},1,false);
+  grid(12,6,(s,k)=>{const xb=0.18-s*0.3,yb=hOf((0.5-xb)/0.7)-0.012,Hh=0.22*Math.sin(Math.PI*(0.12+0.88*s))*(1-0.45*s)+0.02;return[xb-k*0.09,yb+k*Hh,0];},2,false);
+  grid(8,6,(s,k)=>{const xb=-0.02-s*0.14,yb=-hOf((0.5-xb)/0.7)*1.12+0.012;return[xb-k*0.12,yb-k*0.12*(1-0.4*s),0];},3,false);
+  for(const zs of [-1,1]){
+    grid(6,6,(s,k)=>{const xb=0.24-s*0.1,h=hOf((0.5-xb)/0.7);return[xb-k*0.17,-h*1.05-k*0.09,zs*(h*0.28+k*0.05)];},3,false);
+    grid(6,6,(s,k)=>{const xb=0.36-s*0.06,h=hOf((0.5-xb)/0.7);return[xb-k*0.12,-h*0.35-k*0.05,zs*(h*0.59+k*0.07)];},4,false);
+  }
+  finCount=I.length-bodyCount;
+  meshVBO=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,meshVBO);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(V),gl.STATIC_DRAW);
+  meshIBO=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,meshIBO);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(I),gl.STATIC_DRAW);
+}
+function useQuad(){gl.bindBuffer(gl.ARRAY_BUFFER,quad);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);gl.disableVertexAttribArray(1);gl.disableVertexAttribArray(2);gl.disableVertexAttribArray(3);}
+function useMesh(){gl.bindBuffer(gl.ARRAY_BUFFER,meshVBO);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,meshIBO);
+  gl.vertexAttribPointer(0,3,gl.FLOAT,false,36,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,36,12);
+  gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,36,24);gl.enableVertexAttribArray(3);gl.vertexAttribPointer(3,1,gl.FLOAT,false,36,32);}
+function mkFB(w,h){const t=mkTex();gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);gl.bindFramebuffer(gl.FRAMEBUFFER,null);return{f,t,w,h};}
+function initGL(){
+  try{
+    gl=glc.getContext('webgl',{antialias:false,alpha:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'high-performance'});
+    if(!gl)throw new Error('no webgl');
+    P.comp=prog(FS_COMP);P.bright=prog(FS_BRIGHT);P.blur=prog(FS_BLUR);P.out=prog(FS_OUT);P.fish=prog(FS_FISH,VS_FISH);P.fcomp=prog(FS_FCOMP);
+    quad=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,quad);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+    buildFishMesh();useQuad();
+    texScene=mkTex();texFront=mkTex();texRip=mkTex();texCam=mkTex();
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+    texMask=mkTex();gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,1,1,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,new Uint8Array([255]));
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+  }catch(e){console.error(e);gl=null;glc.style.display='none';c2.style.display='block';}
+}
+
+/* ---------------- tank contents ---------------- */
+let fish=[],plantsBack=[],plantsFront=[],bubbles=[],specks=[],food=[],bokeh=[];
+let aerX=0;
+// real goldfish varieties: [body, belly/fin highlight, red patches?]
+const VARIETIES=[
+  {c1:[255,96,14],c2:[255,190,110]},{c1:[255,96,14],c2:[255,190,110]},{c1:[255,110,20],c2:[255,200,120]},
+  {c1:[240,58,18],c2:[255,150,85]},{c1:[240,58,18],c2:[255,150,85]},
+  {c1:[255,150,30],c2:[255,220,140]},
+  {c1:[255,120,40],c2:[255,215,170],spots:[255,248,238]},
+  {c1:[250,244,236],c2:[255,255,255],spots:[240,62,28]},
+  {c1:[255,236,220],c2:[255,255,255]}
+];
+function newFish(oranda){const r=newFish0(oranda);if(Math.random()<0.5){r.face=-1;r.yaw=r.yawT=Math.PI;}return r;}
+function newFish0(oranda){
+  const V=VARIETIES[Math.floor(Math.random()*VARIETIES.length)];
+  const z=rnd(0.05,1);
+  return{c1:V.c1,c2:V.c2,spotC:V.spots||null,oranda:!!oranda,
+    spots:V.spots?Array.from({length:3+Math.floor(Math.random()*3)},()=>({x:rnd(-0.12,0.4),y:rnd(-0.13,0.08),r:rnd(0.045,0.09)})):null,
+    tail:rnd(0.62,0.95),seed:rnd(0,50),pearl:V.c1[2]>200?1:0,pitch:0,amp:0.25,x:rnd(SW*0.1,SW*0.9),y:rnd(surfY+40,floorY-40),z,tz:z,vx:rnd(-20,20),vy:rnd(-5,5),face:1,ang:0,yaw:0,yawT:0,
+    L:rnd(70,100)*(SW/960)**0.6,cruise:rnd(18,30)*(SW/960),ph:rnd(0,TAU),tg:null,tgT:0,scared:0,flee:null,curious:0,cx:0,cy:0,ate:0};
+}
+function buildTank(){
+  surfY=SH*0.075;floorY=SH*0.86;
+  aerX=SW*rnd(0.12,0.22);
+  fish=[];
+  for(let i=0;i<15;i++)fish.push(newFish(false));
+  plantsBack=[];plantsFront=[];
+  const nb=Math.round(SW/30);
+  for(let i=0;i<nb;i++)plantsBack.push({x:rnd(0,SW),h:rnd(SH*0.18,SH*0.55),w:rnd(5,11),ph:rnd(0,TAU),c:Math.random(),type:Math.random()<0.25?'leafy':'blade',z:rnd(0,0.4)});
+  plantsBack.sort((a,b)=>a.z-b.z);
+  for(const side of [0,1])for(let i=0;i<4;i++)plantsFront.push({x:side?rnd(SW*0.86,SW*1.02):rnd(-SW*0.02,SW*0.14),h:rnd(SH*0.3,SH*0.7),w:rnd(16,28),ph:rnd(0,TAU),c:Math.random(),type:Math.random()<0.4?'leafy':'blade'});
+  bubbles=[];specks=[];food=[];
+  for(let i=0;i<110;i++)specks.push({x:rnd(0,SW),y:rnd(0,SH),z:Math.random(),ph:rnd(0,TAU),r:rnd(0.6,1.8),glint:Math.random()<0.12});
+  bokeh=[];
+  for(let i=0;i<16;i++)bokeh.push({x:rnd(0,SW),y:rnd(SH*0.05,SH*0.75),r:rnd(SW*0.012,SW*0.045),ci:i%3,ph:rnd(0,TAU),sp:rnd(0.3,1.1),dx:rnd(-3,3)});
+  makeGravel();
+}
+function makeGravel(){
+  gravelC.width=SW;gravelC.height=Math.ceil(SH-floorY+30);
+  const g=gravelC.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,gravelC.height);gr.addColorStop(0,'rgba(60,62,48,1)');gr.addColorStop(1,'rgba(22,24,18,1)');
+  g.fillStyle=gr;g.fillRect(0,14,SW,gravelC.height);
+  const n=Math.round(SW*gravelC.height/30);
+  for(let i=0;i<n;i++){
+    const x=rnd(0,SW),y=rnd(8,gravelC.height),r=rnd(1.5,5)*(0.6+y/gravelC.height*0.7),t=Math.random();
+    const col=t<0.4?[150,140,118]:t<0.7?[110,104,90]:t<0.9?[190,176,150]:[90,70,60];
+    const s=0.5+0.5*(y/gravelC.height);
+    g.fillStyle=`rgba(${col[0]*s|0},${col[1]*s|0},${col[2]*s|0},0.95)`;
+    g.beginPath();g.ellipse(x,y,r*1.25,r,rnd(0,3),0,TAU);g.fill();
+  }
+}
+
+/* ---------------- sizing ---------------- */
+function resize(){
+  W=innerWidth;H=innerHeight;
+  const s=Math.min(1,960/W);SW=Math.round(W*s);SH=Math.round(H*s);
+  scene.width=SW;scene.height=SH;front.width=SW;front.height=SH;
+  plantC.width=Math.ceil(SW/5);plantC.height=Math.ceil(SH/5);
+  farC.width=Math.ceil(SW*KF);farC.height=Math.ceil(SH*KF);nearC.width=Math.ceil(SW*KN);nearC.height=Math.ceil(SH*KN);
+  makeRipple();
+  if(gl){
+    const r=Math.min(1,1600/W);RW=Math.round(W*r);RH=Math.round(H*r);
+    glc.width=RW;glc.height=RH;
+    mainA=mkFB(RW,RH);mainB=mkFB(RW,RH);
+    b4A=mkFB(Math.ceil(RW/4),Math.ceil(RH/4));b4B=mkFB(b4A.w,b4A.h);
+    b8A=mkFB(Math.ceil(RW/10),Math.ceil(RH/10));b8B=mkFB(b8A.w,b8A.h);
+    fishMid=mkFBD(RW,RH);fishFar=mkFBD(Math.ceil(RW/3),Math.ceil(RH/3));fishNear=mkFBD(Math.ceil(RW/2.4),Math.ceil(RH/2.4));fishAll=mkFB(RW,RH);
+  }else{c2.width=SW;c2.height=SH;}
+  buildTank();
+}
+
+/* ---------------- drawing helpers ---------------- */
+let camOn=false;
+function fishCol(f,c){const t=mix3(c,M.fishTint,M.fishAmt);return mix3(t,M.water,(1-f.z)*(camOn?0.15:0.4));}
+function drawGoldfish(c,f,L){
+  const ph=f.ph,b1=fishCol(f,f.c1),b2=fishCol(f,f.c2),fin=mix3(b1,b2,0.45),dark=mix3(b1,[40,8,0],0.45);
+  const tl=L*f.tail,root=-0.17*L;
+  let g;
+  // flowing double tail, a travelling wave down each lobe
+  for(const k of [-1,1]){
+    const N=10,out=[],inn=[];
+    for(let i=0;i<=N;i++){
+      const u=i/N,w=Math.sin(ph-u*3.2+k*0.5)*L*0.1*u;
+      const x=root-u*tl;
+      out.push([x,k*(L*0.035+u*tl*0.6*(1-0.3*u*u))+w]);
+      inn.push([x+u*tl*0.14,k*(L*0.01+u*tl*0.12)+w*0.92]);
+    }
+    c.beginPath();c.moveTo(root+L*0.03,0);
+    for(let i=1;i<=N;i++){const a=out[i-1],b=out[i];c.quadraticCurveTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2);}
+    c.lineTo(out[N][0],out[N][1]);
+    for(let i=N;i>=0;i--)c.lineTo(inn[i][0],inn[i][1]);
+    c.closePath();
+    g=c.createLinearGradient(root,0,root-tl,0);g.addColorStop(0,rgba(fin,0.88));g.addColorStop(0.55,rgba(fin,0.42));g.addColorStop(1,rgba(b2,0.06));
+    c.fillStyle=g;c.fill();
+    c.strokeStyle=rgba(b2,0.2);c.lineWidth=Math.max(0.4,L*0.006);c.beginPath();
+    for(let r=1;r<=5;r++){const t=r/6,m=Math.round(N*0.5);c.moveTo(root,k*L*0.02);c.quadraticCurveTo(lerp(out[m][0],inn[m][0],t),lerp(out[m][1],inn[m][1],t),lerp(out[N][0],inn[N][0],t),lerp(out[N][1],inn[N][1],t));}
+    c.stroke();
+  }
+  // trailing pelvic and anal fins
+  for(const [x0,y0,len,o] of [[L*0.13,L*0.16,L*0.3,0],[-L*0.07,L*0.11,L*0.34,1.4]]){
+    const w=Math.sin(ph*1.1+o)*L*0.05;
+    c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(x0-len*0.3,y0+len*0.5+w,x0-len*0.9,y0+len*0.62+w);c.quadraticCurveTo(x0-len*0.5,y0+len*0.22,x0-len*0.25,y0-L*0.01);c.closePath();
+    c.fillStyle=rgba(fin,0.42);c.fill();
+  }
+  // tall translucent dorsal fin
+  const dw=Math.sin(ph*0.8)*L*0.035;
+  c.beginPath();c.moveTo(L*0.16,-L*0.16);c.quadraticCurveTo(L*0.07,-L*0.42+dw,-L*0.08+dw,-L*0.4+dw);c.quadraticCurveTo(-L*0.07,-L*0.24,-L*0.15,-L*0.07);c.closePath();
+  g=c.createLinearGradient(0,-L*0.15,0,-L*0.42);g.addColorStop(0,rgba(b1,0.8));g.addColorStop(1,rgba(fin,0.12));c.fillStyle=g;c.fill();
+  // body
+  c.beginPath();
+  c.moveTo(L*0.5,L*0.02);
+  c.bezierCurveTo(L*0.49,-L*0.09,L*0.32,-L*0.17,L*0.1,-L*0.175);
+  c.bezierCurveTo(-L*0.05,-L*0.17,-L*0.14,-L*0.09,-L*0.2,-L*0.045);
+  c.lineTo(-L*0.2,L*0.045);
+  c.bezierCurveTo(-L*0.13,L*0.1,0,L*0.2,L*0.2,L*0.19);
+  c.bezierCurveTo(L*0.38,L*0.17,L*0.49,L*0.11,L*0.5,L*0.02);
+  c.closePath();
+  g=c.createLinearGradient(0,-L*0.18,0,L*0.2);
+  g.addColorStop(0,rgba(mix3(b1,dark,0.35)));g.addColorStop(0.42,rgba(b1));g.addColorStop(0.78,rgba(mix3(b1,b2,0.6)));g.addColorStop(1,rgba(b2));
+  c.fillStyle=g;c.fill();
+  c.save();c.clip();
+  if(f.spots){c.fillStyle=rgba(fishCol(f,f.spotC),0.9);for(const p of f.spots){c.beginPath();c.ellipse(p.x*L,p.y*L,p.r*L*1.4,p.r*L,0.3,0,TAU);c.fill();}}
+  g=c.createRadialGradient(L*0.18,-L*0.07,0,L*0.18,-L*0.07,L*0.26);g.addColorStop(0,'rgba(255,250,230,0.42)');g.addColorStop(1,'rgba(255,250,230,0)');
+  c.fillStyle=g;c.fillRect(-L*0.2,-L*0.3,L*0.75,L*0.6);
+  c.strokeStyle='rgba(255,248,225,0.13)';c.lineWidth=Math.max(0.4,L*0.007);c.beginPath();
+  for(let r=0;r<5;r++)for(let q=0;q<8;q++){const x=L*(0.3-q*0.06+(r%2)*0.03),y=L*(-0.11+r*0.055);c.moveTo(x+L*0.034*Math.cos(-1.2),y+L*0.034*Math.sin(-1.2));c.arc(x,y,L*0.034,-1.2,1.2);}
+  c.stroke();
+  c.strokeStyle=rgba(dark,0.3);c.lineWidth=Math.max(0.5,L*0.012);c.beginPath();c.arc(L*0.48,L*0.02,L*0.14,2.4,3.9);c.stroke();
+  c.restore();
+  if(f.oranda){c.fillStyle=rgba(fishCol(f,[240,70,30]),0.95);for(let i=0;i<8;i++){const a=i/7*Math.PI;c.beginPath();c.arc(L*0.38+Math.cos(a+Math.PI)*L*0.08,-L*0.15-Math.sin(a)*L*0.05,L*0.05,0,TAU);c.fill();}}
+  // pectoral fin
+  c.fillStyle=rgba(fin,0.5);c.beginPath();c.ellipse(L*0.27,L*0.09,L*0.1,L*0.04,0.8+Math.sin(ph*1.6)*0.4,0,TAU);c.fill();
+  // eye: gold iris, dark pupil, glint
+  const ex=L*0.41,ey=-L*0.045,er=L*0.036;
+  c.fillStyle='rgba(222,170,70,0.95)';c.beginPath();c.arc(ex,ey,er,0,TAU);c.fill();
+  c.fillStyle='rgba(12,8,6,0.97)';c.beginPath();c.arc(ex+er*0.08,ey,er*0.62,0,TAU);c.fill();
+  c.fillStyle='rgba(255,255,255,0.85)';c.beginPath();c.arc(ex+er*0.3,ey-er*0.3,er*0.22,0,TAU);c.fill();
+  c.strokeStyle=rgba(dark,0.5);c.lineWidth=Math.max(0.5,L*0.01);c.beginPath();c.arc(L*0.485,L*0.05,L*0.022,0.2,1.6);c.stroke();
+}
+function drawFish(c,f){
+  const L=f.L*(0.42+0.78*f.z)*(camOn?1.4:1);
+  c.save();c.translate(f.x,f.y);
+  const fx=Math.sign(f.face||1)*Math.max(0.16,Math.abs(f.face));
+  c.scale(fx,1);c.rotate(f.ang);
+  c.globalAlpha=camOn?0.62+0.38*f.z:0.42+0.58*f.z;
+  drawGoldfish(c,f,L);
+  c.restore();
+}
+function drawPlant(c,p,t,front,k){
+  const sway=Math.sin(t*0.7+p.ph+p.x*0.004)*(front?16:10);
+  const base=front?SH+10:floorY+8;
+  const col=front?mix3([20,52,30],M.deep,0.35):mix3(mix3([40,96,52],[70,120,50],p.c),M.water,0.45+(0.4-p.z)*0.6);
+  c.save();c.scale(k,k);
+  if(p.type==='blade'){
+    for(let j=0;j<3;j++){
+      const off=(j-1)*p.w*0.9,hk=p.h*(0.75+0.25*Math.sin(j*2.1+p.ph));
+      c.fillStyle=rgba(mix3(col,[0,0,0],j*0.08),front?0.95:0.85);
+      c.beginPath();c.moveTo(p.x+off-p.w*0.5,base);
+      c.quadraticCurveTo(p.x+off+sway*0.4,base-hk*0.55,p.x+off+sway*(1+j*0.15),base-hk);
+      c.quadraticCurveTo(p.x+off+sway*0.4+p.w*0.4,base-hk*0.5,p.x+off+p.w*0.5,base);c.fill();
+    }
+  }else{
+    c.strokeStyle=rgba(col,0.9);c.lineWidth=front?4:2;
+    c.beginPath();c.moveTo(p.x,base);c.quadraticCurveTo(p.x+sway*0.5,base-p.h*0.5,p.x+sway,base-p.h);c.stroke();
+    c.fillStyle=rgba(col,0.85);
+    const n=front?9:6;
+    for(let i=1;i<=n;i++){
+      const u=i/n,x=p.x+sway*u*u,y=base-p.h*u,lw=p.w*(1.1-u*0.5);
+      for(const s of [-1,1]){c.beginPath();c.ellipse(x+s*lw*0.6,y,lw*0.7,lw*0.28,s*0.5,0,TAU);c.fill();}
+    }
+  }
+  c.restore();
+}
+
+/* ---------------- interaction ---------------- */
+let pointer={down:false,x:0,y:0,lx:0,ly:0};
+const hand={seen:false,tip:{x:0,y:0},ltip:{x:0,y:0},palm:{x:0,y:0},open:false,pinch:false,lastSeen:0,found:false};
+function poke(x,y,big){
+  drop(x,y,big?SW*0.022:SW*0.012,big?240:90);
+  if(big)drop(x,y,SW*0.06,40);
+  const R=SW*(big?0.22:0.1);
+  for(const f of fish){
+    const d=Math.hypot(f.x-x,f.y-y);
+    if(d<R*(0.6+f.z*0.6)){
+      const a=Math.atan2(f.y-y,f.x-x)+rnd(-0.4,0.4);
+      f.flee={x:Math.cos(a),y:Math.sin(a)};f.scared=big?rnd(0.6,1.1):0.45;
+      f.curious=big&&Math.random()<0.6?rnd(1.6,3.2):0;f.cx=x;f.cy=y;
+      f.tz=clamp(f.z+rnd(-0.35,0.15),0.05,1);
+    }
+  }
+  if(big)sfxPlip(1,(x/SW)*2-1);
+}
+function feed(){
+  const cx=rnd(SW*0.25,SW*0.75),y0=camOn?SH*0.04:surfY;
+  for(let i=0;i<14;i++)food.push({x:cx+rnd(-SW*0.08,SW*0.08),y:y0+rnd(-4,4),vy:rnd(6,14),ph:rnd(0,TAU),r:rnd(1.6,3),c:Math.random()<0.5?[220,140,70]:[190,100,60],t:0});
+  drop(cx,y0+6,SW*0.03,60);
+  sfxSprinkle();
+}
+
+/* ---------------- simulation ---------------- */
+function bounds(){return camOn?{top:SH*0.06,bot:SH*0.95}:{top:surfY+28,bot:floorY-18};}
+function steer(f,dt,t){
+  const margin=SW*0.04,B=bounds(),top=B.top,bot=B.bot;
+  let dx=0,dy=0,sp=f.cruise;
+  {
+    if(!f.tg||t>f.tgT||Math.hypot(f.tg.x-f.x,f.tg.y-f.y)<20){f.tg={x:rnd(margin*2,SW-margin*2),y:rnd(top+20,bot-20)};f.tgT=t+rnd(4,11);if(Math.random()<0.3)f.tz=rnd(0.05,1);}
+    dx=f.tg.x-f.x;dy=(f.tg.y-f.y)*0.7;
+    let best=null,bd=1e9;
+    for(const p of food){const d=Math.hypot(p.x-f.x,p.y-f.y);if(d<bd){bd=d;best=p;}}
+    if(best&&bd<SW*0.5&&f.ate<4){dx=best.x-f.x;dy=best.y-f.y;sp=f.cruise*1.7;if(bd<f.L*0.35*(0.42+0.78*f.z)){food.splice(food.indexOf(best),1);f.ate++;sfxGulp();setTimeout(()=>{f.ate=Math.max(0,f.ate-1);},9000);}}
+    if(f.curious>0&&f.scared<=0){f.curious-=dt;dx=f.cx-f.x;dy=f.cy-f.y;sp=f.cruise*0.8;if(Math.hypot(dx,dy)<f.L*0.8){dx*=0.05;dy*=0.05;}}
+    // a hand held up to the glass: the fish come and gather around it
+    if(hand.seen&&f.scared<=0){
+      const tg=hand.open?hand.palm:hand.tip,d=Math.hypot(tg.x-f.x,tg.y-f.y);
+      if(d<SW*0.45){const r=hand.open?SW*0.09:SW*0.05;dx=tg.x+Math.cos(t*0.6+f.ph)*r-f.x;dy=tg.y+Math.sin(t*0.5+f.ph)*r*0.7-f.y;sp=f.cruise*0.8;}
+    }
+  }
+  if(f.scared>0){f.scared-=dt;dx=f.flee.x*100;dy=f.flee.y*100;sp=f.cruise*(4+f.scared*3);}
+  if(f.x<margin)dx+=(margin-f.x)*4;if(f.x>SW-margin)dx-=(f.x-(SW-margin))*4;
+  if(f.y<top)dy+=(top-f.y)*4;if(f.y>bot)dy-=(f.y-bot)*4;
+  const m=Math.hypot(dx,dy)||1;
+  const tvx=dx/m*sp,tvy=dy/m*sp*0.75;
+  const k=Math.min(1,dt*(f.scared>0?6:1.4));
+  f.vx+=(tvx-f.vx)*k;f.vy+=(tvy-f.vy)*k;
+  f.x+=f.vx*dt;f.y+=f.vy*dt;
+  f.x=clamp(f.x,-20,SW+20);f.y=clamp(f.y,top-20,bot+12);
+  const v=Math.hypot(f.vx,f.vy);
+  if(Math.abs(f.vx)>3&&(f.vx>0)!==(Math.cos(f.yawT)>0))f.yawT+=(Math.random()<0.5?1:-1)*Math.PI;
+  f.yaw+=(f.yawT-f.yaw)*Math.min(1,dt*(f.scared>0?6:1.8));
+  const pt=clamp(-Math.atan2(f.vy,Math.abs(f.vx)+4),-0.55,0.55);f.pitch+=(pt-f.pitch)*Math.min(1,dt*3);
+  f.face=Math.cos(f.yaw);f.ang=-f.pitch;f.amp=clamp(0.2+v/Math.max(1,f.cruise)*0.1,0.2,0.5);
+  f.ph+=dt*(3+v*0.09*(960/SW));
+  f.z+=(f.tz-f.z)*dt*0.15;
+}
+function update(dt,t){
+  easeMood(dt);
+  for(const f of fish)steer(f,dt,t);
+  const by=camOn?SH*1.02:floorY-8,top=camOn?-10:surfY;
+  if(Math.random()<dt*(camOn?8:12))bubbles.push({x:(camOn?SW*rnd(0.05,0.95):aerX)+rnd(-4,4),y:by,r:rnd(1.5,4.5),vy:rnd(50,90),ph:rnd(0,TAU)});
+  for(const b of bubbles){b.vy=Math.min(b.vy+dt*40,140);b.y-=b.vy*dt;b.x+=Math.sin(b.y*0.05+b.ph)*0.5;}
+  for(let i=bubbles.length-1;i>=0;i--)if(bubbles[i].y<top){const b=bubbles[i];if(!camOn&&b.r>3.5){drop(b.x,surfY+3,SW*0.006,25);if(Math.random()<0.25)sfxBloop();}bubbles.splice(i,1);}
+  const fb=camOn?SH*0.98:floorY-4;
+  for(const p of food){p.t+=dt;p.y+=p.vy*dt*(p.y<surfY+10?0.25:1);p.x+=Math.sin(p.t*2+p.ph)*0.3;if(p.y>fb){p.y=fb;p.vy=0;}}
+  food=food.filter(p=>p.t<40);
+  for(const s of specks){s.y+=Math.sin(t*0.3+s.ph)*0.05;s.x+=(0.6+s.z)*0.05;if(s.x>SW)s.x=0;}
+  for(const b of bokeh){b.x+=b.dx*dt;if(b.x<-b.r)b.x=SW+b.r;if(b.x>SW+b.r)b.x=-b.r;}
+  if(pointer.down){const d=Math.hypot(pointer.x-pointer.lx,pointer.y-pointer.ly);if(d>2){drop(pointer.x,pointer.y,SW*0.01,Math.min(60,d*2.5));for(const f of fish){if(Math.hypot(f.x-pointer.x,f.y-pointer.y)<SW*0.06&&f.scared<=0){const a=Math.atan2(f.y-pointer.y,f.x-pointer.x);f.flee={x:Math.cos(a),y:Math.sin(a)};f.scared=0.4;}}}pointer.lx=pointer.x;pointer.ly=pointer.y;}
+  if(hand.seen&&!hand.open){const d=Math.hypot(hand.tip.x-hand.ltip.x,hand.tip.y-hand.ltip.y);if(d>2.5)drop(hand.tip.x,hand.tip.y,SW*0.009,Math.min(45,d*2));hand.ltip.x=hand.tip.x;hand.ltip.y=hand.tip.y;}
+}
+
+/* ---------------- tube flicker ---------------- */
+let flick=1,flickT=0,nextFlick=3;
+function updFlicker(dt,t){
+  if(t>nextFlick){flickT=rnd(0.15,0.5);nextFlick=t+rnd(5,14);}
+  if(flickT>0){flickT-=dt;flick=Math.random()<0.5?rnd(0.6,0.88):1;}else flick+=(1-flick)*Math.min(1,dt*8);
+}
+
+/* ---------------- scene render (2D) ---------------- */
+const video=$('cam');
+function drawScene(t){
+  let c=sx;
+  c.globalAlpha=1;c.globalCompositeOperation='source-over';
+  c.clearRect(0,0,SW,SH);
+  let g;
+  if(camOn){
+    // a thin veil of water in front of you, darker at the edges
+    g=c.createRadialGradient(SW*0.5,SH*0.45,SW*0.1,SW*0.5,SH*0.45,SW*0.75);
+    g.addColorStop(0,rgba(M.water,0.05));g.addColorStop(1,rgba(M.deep,0.38));
+    c.fillStyle=g;c.fillRect(0,0,SW,SH);
+  }else{
+    g=c.createLinearGradient(0,0,0,SH);
+    g.addColorStop(0,rgba(mix3(M.water,M.tube,0.25)));g.addColorStop(0.35,rgba(M.water));g.addColorStop(1,rgba(M.deep));
+    c.fillStyle=g;c.fillRect(0,0,SW,SH);
+    g=c.createRadialGradient(SW*0.5,surfY,10,SW*0.5,surfY,SW*0.7);g.addColorStop(0,rgba(M.tube,0.22*flick));g.addColorStop(1,rgba(M.tube,0));c.fillStyle=g;c.fillRect(0,0,SW,SH);
+  }
+  // bokeh lights (out-of-focus ornaments and neon behind the tank)
+  c.globalCompositeOperation='lighter';
+  for(const b of bokeh){
+    const a=(camOn?0.16:0.09)*(0.6+0.4*Math.sin(t*b.sp+b.ph));
+    const col=M.bokeh[b.ci];
+    g=c.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);g.addColorStop(0,rgba(col,a*0.7));g.addColorStop(0.75,rgba(col,a));g.addColorStop(0.92,rgba(col,a*1.3));g.addColorStop(1,rgba(col,0));
+    c.fillStyle=g;c.beginPath();c.arc(b.x,b.y,b.r,0,TAU);c.fill();
+  }
+  c.globalCompositeOperation='source-over';
+  if(!camOn){
+    for(const p of plantsBack)drawPlant(c,p,t,false,1);
+    c.drawImage(gravelC,0,floorY-14);
+    c.fillStyle='rgba(60,70,64,0.9)';c.beginPath();c.ellipse(aerX,floorY-4,16,6,0,0,TAU);c.fill();
+    c.strokeStyle='rgba(200,230,215,0.25)';c.lineWidth=2;c.beginPath();c.moveTo(aerX+12,floorY-6);c.bezierCurveTo(aerX+40,floorY-40,aerX+30,SH*0.4,aerX+46,surfY-6);c.stroke();
+    c.globalCompositeOperation='lighter';
+    for(let i=0;i<5;i++){
+      const x=SW*(0.08+i*0.2)+Math.sin(t*0.13+i*1.7)*SW*0.03,w=SW*(0.05+0.03*Math.sin(t*0.2+i));
+      const a=(0.035+0.03*Math.sin(t*0.4+i*2.3))*flick;
+      g=c.createLinearGradient(0,surfY,0,floorY);g.addColorStop(0,rgba(M.shaft,a));g.addColorStop(1,rgba(M.shaft,0));
+      c.fillStyle=g;c.beginPath();c.moveTo(x,surfY);c.lineTo(x+w,surfY);c.lineTo(x+w*2.2+SW*0.08,floorY);c.lineTo(x+SW*0.08,floorY);c.closePath();c.fill();
+    }
+    c.globalCompositeOperation='source-over';
+  }
+  // fish: real 3D in WebGL; flat drawings only if WebGL is missing
+  fish.sort((a,b)=>a.z-b.z);
+  if(!gl)for(const f of fish)drawFish(c,f);
+  c=fcx;c.globalAlpha=1;c.globalCompositeOperation='source-over';c.clearRect(0,0,SW,SH);
+  for(const p of food){c.fillStyle=rgba(p.c,0.9);c.beginPath();c.ellipse(p.x,p.y,p.r,p.r*0.7,p.t+p.ph,0,TAU);c.fill();}
+  c.strokeStyle='rgba(230,245,255,0.55)';c.lineWidth=1;
+  for(const b of bubbles){c.beginPath();c.arc(b.x,b.y,b.r,0,TAU);c.stroke();}
+  c.fillStyle='rgba(255,255,255,0.5)';
+  for(const b of bubbles){c.beginPath();c.arc(b.x-b.r*0.35,b.y-b.r*0.35,b.r*0.3,0,TAU);c.fill();}
+  // specks and glints on the glass
+  for(const s of specks){
+    const tw=0.5+0.5*Math.sin(t*1.7+s.ph);
+    if(s.glint){c.globalCompositeOperation='lighter';c.fillStyle=rgba(mix3(M.tube,[255,255,255],0.5),0.35*tw);c.beginPath();c.arc(s.x,s.y,s.r*1.6,0,TAU);c.fill();c.globalCompositeOperation='source-over';}
+    else{c.fillStyle=`rgba(240,248,255,${0.05+s.z*0.14})`;c.fillRect(s.x,s.y,s.r,s.r);}
+  }
+  if(!camOn){
+    // front plants, blurred cheaply by drawing them small and scaling up
+    px.clearRect(0,0,plantC.width,plantC.height);
+    for(const p of plantsFront)drawPlant(px,p,t,true,0.2);
+    c.imageSmoothingEnabled=true;c.drawImage(plantC,0,0,plantC.width*5,plantC.height*5);
+    c.fillStyle=rgba(mix3(M.deep,[30,34,32],0.5),0.92);c.fillRect(0,0,SW,surfY);
+    g=c.createLinearGradient(0,surfY-6,0,surfY+26);g.addColorStop(0,rgba(M.tube,0));g.addColorStop(0.25,rgba(mix3(M.tube,[255,255,255],0.4),0.45*flick));g.addColorStop(1,rgba(M.tube,0));
+    c.fillStyle=g;c.fillRect(0,surfY-6,SW,32);
+    c.strokeStyle=rgba([255,255,255],0.5*flick);c.lineWidth=1.2;c.beginPath();
+    for(let x=0;x<=SW;x+=16){const y=surfY+Math.sin(x*0.03+t*1.6)*1.4+Math.sin(x*0.011-t)*1.2;x?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+    const ty=surfY*0.42;
+    c.globalCompositeOperation='lighter';
+    g=c.createLinearGradient(0,ty-26,0,ty+26);g.addColorStop(0,rgba(M.tube,0));g.addColorStop(0.5,rgba(M.tube,0.55*flick));g.addColorStop(1,rgba(M.tube,0));
+    c.fillStyle=g;c.fillRect(SW*0.03,ty-26,SW*0.94,52);
+    c.fillStyle=rgba(mix3(M.tube,[255,255,255],0.7),0.95*flick);c.fillRect(SW*0.04,ty-3,SW*0.92,6);
+    c.globalCompositeOperation='source-over';
+    c.fillStyle='rgba(6,10,9,0.75)';c.fillRect(0,0,SW*0.012,SH);c.fillRect(SW*0.988,0,SW*0.012,SH);c.fillRect(0,SH-SH*0.018,SW,SH*0.018);
+  }
+  // glass reflection streak
+  c.globalCompositeOperation='lighter';
+  g=c.createLinearGradient(SW*0.62,0,SW*0.8,SH);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(0.5,'rgba(255,255,255,0.04)');g.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=g;c.beginPath();c.moveTo(SW*0.66,0);c.lineTo(SW*0.72,0);c.lineTo(SW*0.5,SH);c.lineTo(SW*0.44,SH);c.closePath();c.fill();
+  // your hand on the glass
+  if(hand.seen){
+    const p=hand.open?hand.palm:hand.tip,r=hand.open?SW*0.06:SW*0.02;
+    g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,r);g.addColorStop(0,rgba(mix3(M.tube,[255,255,255],0.6),hand.pinch?0.6:0.32));g.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=g;c.beginPath();c.arc(p.x,p.y,r,0,TAU);c.fill();
+  }
+  c.globalCompositeOperation='source-over';
+}
+
+/* ---------------- GL render ---------------- */
+let stepOn=false,frameN=0,camFrac=[1,1];
+function draw(prog,fb,w,h){gl.bindFramebuffer(gl.FRAMEBUFFER,fb?fb.f:null);gl.viewport(0,0,w,h);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}
+function bindT(unit,tex){gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,tex);}
+function c01(c){return[c[0]/255,c[1]/255,c[2]/255];}
+function fishUniforms(p,f){
+  const L=f.L*(0.42+0.78*f.z)*(camOn?1.4:1);
+  gl.uniform2f(U(p,'uPos'),f.x/SW*2-1,1-f.y/SH*2);gl.uniform2f(U(p,'uScale'),L/SW*2,L/SH*2);
+  gl.uniform1f(U(p,'uYaw'),f.yaw+Math.sin(f.ph*0.5)*0.08);gl.uniform1f(U(p,'uPitch'),f.pitch);gl.uniform1f(U(p,'uPh'),f.ph);gl.uniform1f(U(p,'uAmp'),f.amp);
+  gl.uniform1f(U(p,'uDepth'),0.9-f.z*1.6);gl.uniform1f(U(p,'uTail'),f.tail);
+  const tint=c=>c01(mix3(c,M.fishTint,M.fishAmt));
+  gl.uniform3fv(U(p,'uC1'),tint(f.c1));gl.uniform3fv(U(p,'uC2'),tint(f.c2));gl.uniform3fv(U(p,'uSpotC'),tint(f.spotC||f.c2));
+  gl.uniform1f(U(p,'uSpots'),f.spots?1:0);gl.uniform1f(U(p,'uSeed'),f.seed);gl.uniform1f(U(p,'uPearl'),f.pearl);gl.uniform1f(U(p,'uFog'),(1-f.z)*(camOn?0.18:0.42));
+}
+function renderFish(fb,list){
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fb.f);gl.viewport(0,0,fb.w,fb.h);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  if(!list.length)return;
+  const p=P.fish;gl.useProgram(p);useMesh();
+  gl.uniform3fv(U(p,'uLA'),c01(M.lightA));gl.uniform3fv(U(p,'uLB'),c01(M.lightB));gl.uniform3fv(U(p,'uAmb'),c01(camOn?mix3(M.water,M.camLow,0.5):M.water));
+  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LESS);gl.depthMask(true);gl.disable(gl.BLEND);
+  for(const f of list){fishUniforms(p,f);gl.drawElements(gl.TRIANGLES,bodyCount,gl.UNSIGNED_SHORT,0);}
+  gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+  for(const f of list){fishUniforms(p,f);gl.drawElements(gl.TRIANGLES,finCount,gl.UNSIGNED_SHORT,bodyCount*2);}
+  gl.depthMask(true);gl.disable(gl.BLEND);gl.disable(gl.DEPTH_TEST);
+}
+function renderGL(t){
+  for(let i=0;i<GW*GH;i++){const v=128+ra[i]*0.55;r8[i]=v<0?0:v>255?255:v;}
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+  bindT(1,texRip);gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,GW,GH,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,r8);
+  const doComp=!stepOn||frameN%3===0;
+  if(doComp){
+    bindT(0,texScene);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,scene);
+    bindT(5,texFront);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,front);
+    if(camOn&&video.readyState>=2){bindT(3,texCam);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,video);
+      const va=video.videoWidth/video.videoHeight,sa=W/H;camFrac=va>sa?[sa/va,1]:[1,va/sa];}
+    if(maskDirty){bindT(4,texMask);gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,maskW,maskH,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,mask8);maskDirty=false;}
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+    // 3D fish: far and near layers rendered small (soft focus), the middle sharp
+    renderFish(fishFar,fish.filter(f=>f.z<0.3));renderFish(fishMid,fish.filter(f=>f.z>=0.3&&f.z<=0.86));renderFish(fishNear,fish.filter(f=>f.z>0.86));
+    useQuad();gl.useProgram(P.fcomp);bindT(0,fishFar.t);bindT(1,fishMid.t);bindT(2,fishNear.t);
+    gl.uniform1i(U(P.fcomp,'uFar'),0);gl.uniform1i(U(P.fcomp,'uMid'),1);gl.uniform1i(U(P.fcomp,'uNear'),2);draw(P.fcomp,fishAll,RW,RH);
+    bindT(0,texScene);bindT(1,texRip);bindT(2,mainA.t);bindT(3,texCam);bindT(4,texMask);bindT(5,texFront);bindT(6,fishAll.t);
+    const p=P.comp;gl.useProgram(p);
+    gl.uniform1i(U(p,'uScene'),0);gl.uniform1i(U(p,'uRip'),1);gl.uniform1i(U(p,'uPrev'),2);gl.uniform1i(U(p,'uCam'),3);gl.uniform1i(U(p,'uMask'),4);gl.uniform1i(U(p,'uFront'),5);gl.uniform1i(U(p,'uFish'),6);gl.uniform1f(U(p,'uMaskOn'),maskOK&&dimRoom?1:0);gl.uniform1f(U(p,'uExpo'),expo);
+    gl.uniform2f(U(p,'uRT'),1/GW,1/GH);gl.uniform2f(U(p,'uCamFrac'),camFrac[0],camFrac[1]);gl.uniform1f(U(p,'uT'),t);
+    gl.uniform1f(U(p,'uMix'),stepOn?0.5:0.2);gl.uniform1f(U(p,'uWeave'),stepOn?1.6:1);gl.uniform1f(U(p,'uCamOn'),camOn&&video.readyState>=2?1:0);
+    gl.uniform3fv(U(p,'uLift'),M.lift);gl.uniform3fv(U(p,'uGain'),M.gain);gl.uniform1f(U(p,'uGamma'),M.gamma);gl.uniform1f(U(p,'uSat'),M.sat);
+    gl.uniform3fv(U(p,'uSpec'),c01(M.tube));gl.uniform3fv(U(p,'uDeep'),c01(M.deep));gl.uniform3fv(U(p,'uCamLow'),c01(M.camLow));gl.uniform3fv(U(p,'uCamHigh'),c01(M.camHigh));gl.uniform3fv(U(p,'uLightA'),c01(M.lightA));gl.uniform3fv(U(p,'uLightB'),c01(M.lightB));
+    draw(p,mainB,RW,RH);
+    const tmp=mainA;mainA=mainB;mainB=tmp;
+    // glow: bright parts → blurred at 1/4 and 1/10 size
+    gl.useProgram(P.bright);bindT(0,texScene);bindT(1,fishAll.t);bindT(2,texFront);gl.uniform1i(U(P.bright,'uTex'),0);gl.uniform1i(U(P.bright,'uFish'),1);gl.uniform1i(U(P.bright,'uFront'),2);gl.uniform2f(U(P.bright,'uTx'),1/SW,1/SH);draw(P.bright,b4A,b4A.w,b4A.h);
+    gl.useProgram(P.blur);gl.uniform1i(U(P.blur,'uTex'),0);
+    bindT(0,b4A.t);gl.uniform2f(U(P.blur,'uDir'),1.3/b4A.w,0);draw(P.blur,b4B,b4A.w,b4A.h);
+    bindT(0,b4B.t);gl.uniform2f(U(P.blur,'uDir'),0,1.3/b4A.h);draw(P.blur,b4A,b4A.w,b4A.h);
+    bindT(0,b4A.t);gl.uniform2f(U(P.blur,'uDir'),1.6/b4A.w,0);draw(P.blur,b8B,b8A.w,b8A.h);
+    bindT(0,b8B.t);gl.uniform2f(U(P.blur,'uDir'),0,1.6/b8A.h);draw(P.blur,b8A,b8A.w,b8A.h);
+  }
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+  const o=P.out;gl.useProgram(o);
+  bindT(0,mainA.t);bindT(1,b4A.t);bindT(2,b8A.t);
+  gl.uniform1i(U(o,'uMain'),0);gl.uniform1i(U(o,'uB4'),1);gl.uniform1i(U(o,'uB8'),2);
+  gl.uniform1f(U(o,'uT'),t);gl.uniform1f(U(o,'uGrain'),0.09);gl.uniform1f(U(o,'uFlick'),camOn?1:0.92+0.08*flick);gl.uniform1f(U(o,'uGlow'),+$('glow').value);gl.uniform2f(U(o,'uRes'),RW,RH);
+  draw(o,null,RW,RH);
+}
+function render2D(){const c=c2.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,SW,SH);c.drawImage(scene,0,0);c.drawImage(front,0,0);}
+
+/* ---------------- subtitles ---------------- */
+const LINES=[
+  ['魚不會記得你。可是我會。','The fish won’t remember you. I will.'],
+  ['這一缸水，比外面安靜。','It’s quieter in here than out there.'],
+  ['牠們游了一整天，哪裡也沒去。','They swam all day and went nowhere.'],
+  ['我每天晚上都來看牠們。','I come to see them every night.'],
+  ['戳一下玻璃，牠們就躲開，然後又回來。','Tap the glass and they hide. Then they come back.'],
+  ['霓虹燈關了，牠們還醒著。','The neon’s off. They’re still awake.']
+];
+let subsOn=false,subI=0,subT=0;
+function updSubs(t){
+  if(!subsOn||t<=subT)return;
+  const L=LINES[subI%LINES.length];subI++;const el=$('sub');el.style.opacity=0;
+  setTimeout(()=>{el.querySelector('.zh').textContent=L[0];el.querySelector('.en').textContent=L[1];el.style.opacity=1;},700);subT=t+7;
+}
+
+/* ---------------- audio ---------------- */
+let ac=null,master=null,recDest=null,sndOn=true;
+function startAudio(){
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+  ac=new AC();master=ac.createGain();master.gain.value=0;master.connect(ac.destination);
+  recDest=ac.createMediaStreamDestination();master.connect(recDest);
+  const len=ac.sampleRate*4,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);
+  let b=0;for(let i=0;i<len;i++){b=(b+0.02*(Math.random()*2-1))/1.02;d[i]=b*3.5;}
+  const hum=ac.createBufferSource();hum.buffer=buf;hum.loop=true;
+  const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;
+  const hg=ac.createGain();hg.gain.value=0.22;hum.connect(lp);lp.connect(hg);hg.connect(master);hum.start();
+  const wb=ac.createBufferSource();wb.buffer=buf;wb.loop=true;wb.playbackRate.value=2.3;
+  const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1100;bp.Q.value=1.4;
+  const wg=ac.createGain();wg.gain.value=0.05;
+  const lfo=ac.createOscillator();lfo.frequency.value=0.35;const lg=ac.createGain();lg.gain.value=0.03;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
+  wb.connect(bp);bp.connect(wg);wg.connect(master);wb.start();
+  const buzz=ac.createOscillator();buzz.type='sawtooth';buzz.frequency.value=100;
+  const bl=ac.createBiquadFilter();bl.type='lowpass';bl.frequency.value=320;const bg=ac.createGain();bg.gain.value=0.01;
+  buzz.connect(bl);bl.connect(bg);bg.connect(master);buzz.start();
+  master.gain.linearRampToValueAtTime(sndOn?0.9:0,ac.currentTime+1.5);
+}
+function env(node,peak,a,d){const g=ac.createGain();g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(peak,ac.currentTime+a);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+a+d);node.connect(g);return g;}
+function out(node,pan){if(ac.createStereoPanner){const p=ac.createStereoPanner();p.pan.value=clamp(pan||0,-1,1);node.connect(p);p.connect(master);}else node.connect(master);}
+function sfxPlip(s,pan){
+  if(!ac)return;const t=ac.currentTime;
+  const o=ac.createOscillator();o.type='sine';const f0=rnd(900,1300);o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*0.28,t+0.13);
+  out(env(o,0.32*s,0.004,0.2),pan);o.start(t);o.stop(t+0.3);
+  const o2=ac.createOscillator();o2.type='sine';o2.frequency.setValueAtTime(f0*2.1,t+0.02);o2.frequency.exponentialRampToValueAtTime(f0*0.9,t+0.1);
+  out(env(o2,0.08*s,0.003,0.1),pan);o2.start(t+0.02);o2.stop(t+0.2);
+}
+function sfxBloop(){if(!ac)return;const t=ac.currentTime,o=ac.createOscillator();o.type='sine';const f=rnd(380,620);o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*2.2,t+0.06);out(env(o,0.05,0.003,0.07),rnd(-0.8,-0.3));o.start(t);o.stop(t+0.12);}
+function sfxGulp(){if(!ac)return;const t=ac.currentTime,o=ac.createOscillator();o.type='sine';o.frequency.setValueAtTime(260,t);o.frequency.exponentialRampToValueAtTime(140,t+0.08);out(env(o,0.07,0.004,0.08),0);o.start(t);o.stop(t+0.12);}
+function sfxSprinkle(){if(!ac)return;for(let i=0;i<6;i++){const t=ac.currentTime+i*0.035+Math.random()*0.02,o=ac.createOscillator();o.type='triangle';o.frequency.value=rnd(2400,4200);const g=ac.createGain();g.gain.setValueAtTime(0.025,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);o.connect(g);out(g,rnd(-0.3,0.3));o.start(t);o.stop(t+0.06);}}
+
+/* ---------------- camera + hands ---------------- */
+let stream=null,hands=null,handOn=false,lastDetect=0,lastVT=-1;
+const VURL='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+let visionP=null;
+function vision(){return visionP||(visionP=import(VURL+'/vision_bundle.mjs').then(async m=>({m,fs:await m.FilesetResolver.forVisionTasks(VURL+'/wasm')})).catch(e=>{visionP=null;throw e;}));}
+// person cut-out: keeps you, hides your room behind dark water
+let seg=null,segLoading=false,maskOK=false,mask8=null,maskW=1,maskH=1,maskDirty=false,lastSeg=0;
+async function ensureSeg(){
+  if(seg||segLoading)return;segLoading=true;
+  try{
+    const {m,fs}=await vision();
+    const o=d=>({baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite',delegate:d},runningMode:'VIDEO',outputCategoryMask:false,outputConfidenceMasks:true});
+    try{seg=await m.ImageSegmenter.createFromOptions(fs,o('GPU'));}catch(e){seg=await m.ImageSegmenter.createFromOptions(fs,o('CPU'));}
+  }catch(e){console.error(e);toast('The background cut-out could not load (are you online?), so your room may show through.',7000);}
+  segLoading=false;
+}
+function runSeg(now){
+  if(!camOn||!dimRoom||!seg||video.readyState<2||now-lastSeg<70)return;
+  lastSeg=now;
+  try{seg.segmentForVideo(video,now,res=>{
+    const mk=res.confidenceMasks&&res.confidenceMasks[0];if(!mk)return;
+    const f=mk.getAsFloat32Array();maskW=mk.width;maskH=mk.height;
+    if(!mask8||mask8.length!==f.length)mask8=new Uint8Array(f.length);
+    for(let i=0;i<f.length;i++)mask8[i]=f[i]*255;
+    maskDirty=true;maskOK=true;
+  });}catch(e){}
+}
+// auto-exposure so a bright webcam never blows out
+const meter=document.createElement('canvas');meter.width=32;meter.height=18;const mx=meter.getContext('2d',{willReadFrequently:true});
+let expo=1,expoTarget=1,lastMeter=0;
+function meterCam(now){
+  if(!camOn||video.readyState<2||now-lastMeter<400)return;lastMeter=now;
+  mx.drawImage(video,0,0,32,18);const d=mx.getImageData(8,2,16,14).data;let sum=0;
+  for(let i=0;i<d.length;i+=4)sum+=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+  const mean=sum/(d.length/4)/255;expoTarget=clamp(0.32/Math.max(mean,0.02),0.4,1.8);
+}
+async function ensureCam(){
+  if(stream)return true;
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:false});video.srcObject=stream;await video.play();return true;}
+  catch(e){toast(e.name==='NotAllowedError'?'The camera was refused. Allow it in the address bar (and on a Mac in System Settings → Privacy & Security → Camera), then try again.':'Could not open the camera ('+e.name+').',7000);return false;}
+}
+function stopCamIfIdle(){if(!camOn&&!handOn&&stream){stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;}}
+async function ensureHands(){
+  if(hands)return true;
+  toast('Loading hand tracking… (needs internet the first time)',4000);
+  try{
+    const {m,fs}=await vision();const HandLandmarker=m.HandLandmarker;
+    const o=d=>({baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:d},runningMode:'VIDEO',numHands:1,minHandDetectionConfidence:0.5,minHandPresenceConfidence:0.5,minTrackingConfidence:0.5});
+    try{hands=await HandLandmarker.createFromOptions(fs,o('GPU'));}catch(e){console.warn('GPU hands failed, using CPU',e);hands=await HandLandmarker.createFromOptions(fs,o('CPU'));}
+    toast('Hold your hand up to the camera. Your fingertip glows and leaves ripples. Pinch thumb and finger to poke. Open your palm and the fish come to it.',8000);
+    return true;
+  }catch(e){console.error(e);toast('Hand tracking could not load ('+(e.message||e)+'). Clicking still pokes.',8000);return false;}
+}
+function trackHand(now){
+  if(!handOn||!hands||video.readyState<2)return;
+  if(now-lastDetect<45||video.currentTime===lastVT)return; // ~20 checks a second keeps everything else smooth
+  lastDetect=now;lastVT=video.currentTime;
+  let r;try{r=hands.detectForVideo(video,now);}catch(e){return;}
+  const lm=r&&r.landmarks&&r.landmarks[0];
+  const dot=$('handdot');
+  if(!lm){if(hand.seen&&now-hand.lastSeen>300){hand.seen=false;hand.pinch=false;}dot.textContent='no hand seen';dot.style.borderColor='';return;}
+  const vw=video.videoWidth,vh=video.videoHeight,s=Math.max(SW/vw,SH/vh),cw=vw*s,ch=vh*s,ox=(SW-cw)/2,oy=(SH-ch)/2;
+  const Pt=i=>({x:SW-(ox+lm[i].x*cw),y:oy+lm[i].y*ch});
+  const D=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const wr=Pt(0),palmSize=D(wr,Pt(9))||1;
+  const ext=[[8,6],[12,10],[16,14],[20,18]].map(([t,p])=>D(Pt(t),wr)>D(Pt(p),wr)*1.1);
+  const tip=Pt(8),th=Pt(4);
+  const pr=D(tip,th)/palmSize;
+  const wasPinch=hand.pinch;
+  if(!hand.pinch&&pr<0.3)hand.pinch=true;else if(hand.pinch&&pr>0.45)hand.pinch=false;
+  hand.open=ext.every(Boolean)&&!hand.pinch&&pr>0.5;
+  const tgt=hand.pinch?{x:(tip.x+th.x)/2,y:(tip.y+th.y)/2}:tip;
+  if(!hand.seen){hand.tip.x=hand.ltip.x=tgt.x;hand.tip.y=hand.ltip.y=tgt.y;}
+  hand.tip.x+=(tgt.x-hand.tip.x)*0.65;hand.tip.y+=(tgt.y-hand.tip.y)*0.65;
+  const pc={x:(wr.x+Pt(5).x+Pt(17).x+Pt(9).x)/4,y:(wr.y+Pt(5).y+Pt(17).y+Pt(9).y)/4};
+  hand.palm.x+=(pc.x-hand.palm.x)*0.5;hand.palm.y+=(pc.y-hand.palm.y)*0.5;
+  hand.seen=true;hand.lastSeen=now;
+  if(!hand.found){hand.found=true;toast('Hand found ✋',1800);}
+  if(hand.pinch&&!wasPinch)poke(hand.tip.x,hand.tip.y,true);
+  dot.textContent=hand.pinch?'pinch → poke':hand.open?'open palm → fish come to you':'fingertip → ripples';dot.style.borderColor='rgba(255,226,120,.7)';
+}
+
+/* ---------------- recording ---------------- */
+let rec=null,recC=null,recX=null,chunks=[];
+function startRec(){
+  const src=gl?glc:c2;
+  recC=document.createElement('canvas');recC.width=src.width;recC.height=src.height;recX=recC.getContext('2d');
+  const s=recC.captureStream(30);
+  if(recDest)recDest.stream.getAudioTracks().forEach(tr=>s.addTrack(tr));
+  const type=['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+  if(!type){toast('Recording is not supported in this browser. Use your screen recorder instead.');return;}
+  rec=new MediaRecorder(s,{mimeType:type,videoBitsPerSecond:12e6});chunks=[];
+  rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  rec.onstop=()=>{const b=new Blob(chunks,{type:rec.mimeType});const a=$('dl');a.href=URL.createObjectURL(b);a.download='fish-tank.'+(rec.mimeType.includes('mp4')?'mp4':'webm');a.style.display='inline-block';rec=null;recC=null;$('rec').classList.remove('live');$('rec').textContent='● record';};
+  rec.start();$('rec').classList.add('live');$('rec').textContent='■ stop';$('dl').style.display='none';
+}
+function burnSubs(x,w,h){
+  if(!subsOn)return;const el=$('sub');const op=+getComputedStyle(el).opacity;if(op<0.01)return;
+  const k=w/W,zh=el.querySelector('.zh').textContent,en=el.querySelector('.en').textContent;
+  x.save();x.globalAlpha=op;x.textAlign='center';x.fillStyle='#ffe33a';x.shadowColor='rgba(0,0,0,0.9)';x.shadowBlur=4*k;x.shadowOffsetY=1*k;
+  const fz=Math.max(18,Math.min(30,W*0.024))*k,fe=Math.max(14,Math.min(21,W*0.017))*k,y=h*0.84-fe*1.4;
+  x.font=`500 ${fz}px "Noto Sans TC",sans-serif`;x.fillText(zh,w/2,y);
+  x.font=`500 ${fe}px Arial,sans-serif`;x.fillText(en,w/2,y+fe*1.5);x.restore();
+}
+// picture: grabbed straight after the frame is drawn, so it matches what you see
+let shotPending=false;
+function takeShot(){
+  if(!shotPending)return;shotPending=false;
+  const src=gl?glc:c2,c=document.createElement('canvas');c.width=src.width;c.height=src.height;
+  const x=c.getContext('2d');x.drawImage(src,0,0);burnSubs(x,c.width,c.height);
+  const d=new Date(),stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}`;
+  c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fish-tank-'+stamp+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);},'image/png');
+  const f=$('flash');f.style.transition='none';f.style.opacity=0.7;requestAnimationFrame(()=>{f.style.transition='opacity .45s';f.style.opacity=0;});
+  sfxShutter();toast('Saved to your Downloads',2000);
+}
+function sfxShutter(){if(!ac)return;const t=ac.currentTime;for(const [dt,f] of [[0,2600],[0.07,1800]]){const n=ac.createBufferSource(),len=Math.floor(ac.sampleRate*0.04),b=ac.createBuffer(1,len,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);n.buffer=b;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=1.2;const g=ac.createGain();g.gain.value=0.35;n.connect(bp);bp.connect(g);g.connect(master);n.start(t+dt);}}
+function drawRecFrame(){
+  if(!rec||!recX)return;
+  const src=gl?glc:c2;recX.drawImage(src,0,0,recC.width,recC.height);
+  burnSubs(recX,recC.width,recC.height);
+}
+
+/* ---------------- loop ---------------- */
+let running=false,last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;const t=now/1000;
+  if(running){
+    trackHand(now);runSeg(now);meterCam(now);expo+=(expoTarget-expo)*Math.min(1,dt*2);
+    update(dt,t);updFlicker(dt,t);updSubs(t);
+    rippleStep();
+    if(!stepOn||frameN%3===0)drawScene(t);
+    if(gl)renderGL(t);else render2D();
+    drawRecFrame();takeShot();
+    frameN++;
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- UI ---------------- */
+function toast(m,ms=4000){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ms);}
+function toScene(e){const r=(gl?glc:c2).getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*SW,y:(e.clientY-r.top)/r.height*SH};}
+for(const el of [glc,c2]){
+  el.addEventListener('pointerdown',e=>{if(!running)return;el.setPointerCapture(e.pointerId);const p=toScene(e);pointer.down=true;pointer.x=pointer.lx=p.x;pointer.y=pointer.ly=p.y;poke(p.x,p.y,true);if(ac&&ac.state==='suspended')ac.resume();});
+  el.addEventListener('pointermove',e=>{if(!pointer.down)return;const p=toScene(e);pointer.x=p.x;pointer.y=p.y;});
+  const up=()=>{pointer.down=false;};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+}
+function goFull(){const d=document.documentElement;if(!document.fullscreenElement&&d.requestFullscreen)d.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}
+function toggleFull(){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else goFull();}
+document.addEventListener('fullscreenchange',()=>{$('full').textContent=document.fullscreenElement?'exit full screen':'full screen';});
+$('go').addEventListener('click',()=>{goFull();startAudio();$('start').classList.add('gone');running=true;setTimeout(()=>$('hint').style.opacity=0,9000);});
+$('feed').addEventListener('click',feed);
+function nextMood(){moodI=(moodI+1)%MOODS.length;$('mood').textContent='light: '+MOODS[moodI].name;}
+$('mood').addEventListener('click',nextMood);
+$('step').addEventListener('click',()=>{stepOn=!stepOn;$('step').textContent='step-print: '+(stepOn?'on':'off');$('step').classList.toggle('on',stepOn);});
+$('subs').addEventListener('click',()=>{subsOn=!subsOn;subT=0;$('subs').textContent='subtitles: '+(subsOn?'on':'off');$('subs').classList.toggle('on',subsOn);if(!subsOn)$('sub').style.opacity=0;});
+$('me').addEventListener('click',async()=>{
+  if(!camOn){if(!(await ensureCam()))return;camOn=true;if(moodI===0){moodI=1;$('mood').textContent='light: '+MOODS[1].name;}}
+  else{camOn=false;maskOK=false;stopCamIfIdle();}
+  $('me').textContent='you behind the glass: '+(camOn?'on':'off');$('me').classList.toggle('on',camOn);
+});
+let dimRoom=false;
+$('room').addEventListener('click',()=>{
+  dimRoom=!dimRoom;
+  if(dimRoom&&!seg){toast('Fading your room into the dark… (a few seconds the first time)',4000);ensureSeg();}
+  $('room').textContent='room: '+(dimRoom?'dimmed':'showing');$('room').classList.toggle('on',dimRoom);
+});
+$('handb').addEventListener('click',async()=>{
+  if(!handOn){$('handb').textContent='hand play: loading…';if(!(await ensureCam())||!(await ensureHands())){$('handb').textContent='hand play: off';stopCamIfIdle();return;}handOn=true;hand.found=false;$('handdot').style.display='block';}
+  else{handOn=false;hand.seen=false;$('handdot').style.display='none';stopCamIfIdle();}
+  $('handb').textContent='hand play: '+(handOn?'on':'off');$('handb').classList.toggle('on',handOn);
+});
+$('snd').addEventListener('click',()=>{sndOn=!sndOn;if(master)master.gain.linearRampToValueAtTime(sndOn?0.9:0,ac.currentTime+0.4);$('snd').textContent='sound: '+(sndOn?'on':'off');$('snd').classList.toggle('on',sndOn);});
+$('rec').addEventListener('click',()=>{if(rec)rec.stop();else startRec();});
+$('shot').addEventListener('click',()=>{if(running)shotPending=true;});
+$('full').addEventListener('click',toggleFull);
+$('hide').addEventListener('click',()=>{document.body.classList.add('clean');toast('Press H to bring the controls back',2500);});
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(k===' '){e.preventDefault();if(running)feed();}
+  else if(k==='m'&&running)nextMood();
+  else if(k==='h')document.body.classList.toggle('clean');
+  else if(k==='f'&&running)toggleFull();
+  else if(k==='r'&&running){if(rec)rec.stop();else startRec();}
+  else if(k==='s'&&running)shotPending=true;
+});
+addEventListener('resize',resize);
+
+initGL();
+if(!gl)toast('This browser can’t run the water effect, so ripples and glow are turned off.',6000);
+resize();
+requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>

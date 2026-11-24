@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bloom by smile</title>
+<meta name="description" content="Smile and the garden grows. Frown and the flowers wilt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{overflow-x:clip}
+main{max-width:760px;margin:0 auto;padding:clamp(28px,6vw,70px) 20px 60px;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px;text-decoration:none;margin-bottom:10px}
+.hero{text-align:center;margin-bottom:34px}
+.hero p{max-width:540px;margin:0 auto 24px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+.card{border-radius:20px;padding:22px 22px 18px;margin-top:20px}
+.card h3{margin:0 0 10px}
+.card ul{margin:0;padding-left:18px}
+.card li{margin:5px 0}
+kbd{font:500 12px ui-monospace,monospace;border-radius:6px;padding:1px 6px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ph h3{margin:0}
+#copy{min-height:44px;padding:0 18px}
+pre{margin:0;max-height:440px;overflow:auto;white-space:pre-wrap;word-break:break-word;border-radius:12px;padding:16px;font:13px/1.6 ui-monospace,"DM Mono",monospace}
+.steps{margin:0 0 12px;font-size:14px}
+footer{text-align:center;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+.btn:focus-visible,.back:focus-visible,#copy:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+
+.preview{display:block;position:relative;aspect-ratio:16/10;width:100%;max-width:580px;margin:0 auto 22px;border-radius:18px;overflow:hidden;text-decoration:none;box-shadow:0 24px 60px rgba(0,0,0,.35);transition:transform .25s}
+.preview{outline:1px solid rgba(127,127,127,.25);outline-offset:-1px}
+.preview:hover{transform:translateY(-3px)}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .tag{position:absolute;right:12px;bottom:12px;padding:6px 12px;border-radius:999px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lead{max-width:540px;margin:0 auto 22px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin:44px 0 4px;text-align:center}
+.sec-title{display:flex;align-items:baseline;gap:14px;margin:0 0 6px}
+.sec-title .n{font:600 14px ui-monospace,"DM Mono",monospace;opacity:.6}
+.sec-title h3{margin:0}
+.sub{margin:0 0 14px;font-size:14px;opacity:.85}
+.ver{border-top:1px solid rgba(127,127,127,.25);padding:16px 0 4px}
+.ver h4{margin:0 0 4px;font-size:16px}
+.ver p{margin:0 0 10px;font-size:14px;opacity:.9}
+.ver ul{margin:0 0 12px;padding-left:18px;font-size:14px}
+.ver li{margin:3px 0}
+.go{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:600;text-decoration:underline;text-underline-offset:4px;color:inherit}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.pill{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(127,127,127,.4)}
+.acts.left{justify-content:flex-start;margin:4px 0 16px}
+.bugs{margin:0;padding-left:0;list-style:none}
+.bugs li{padding:10px 0;border-top:1px solid rgba(127,127,127,.22);font-size:14px}
+.bugs b{display:block;margin-bottom:2px}
+.bugs span{opacity:.85}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.preview{transition:none}}
+
+/* VOICE tender, playful, a little magic · IDEA a storybook garden label · PICTURE flowers rising from the bottom edge
+   COLOUR blush, peony, buttercup, lilac · TYPE Great Vibes + DM Sans · LAYOUT one centred column, garden along the bottom */
+body{background:radial-gradient(120% 90% at 50% 0%,#fff4f6 0%,#f7d9e2 55%,#efc3d1 100%) fixed;color:#3a1f2b;font:16px/1.6 "DM Sans",system-ui,sans-serif;padding-bottom:120px}
+.back{color:#7a4a5c}
+h1{font:400 clamp(70px,13vw,112px)/1 "Great Vibes",cursive;margin:0 0 12px}
+.hero p{color:#5a3442}
+.btn{background:#3a1f2b;color:#fff;font:500 15px "DM Sans",sans-serif}
+.btn:hover{background:#5a2f42}
+.btn.alt{background:rgba(255,248,250,.74);color:#3a1f2b;border:1px solid rgba(58,31,43,.18)}
+.btn.alt:hover{background:#fff}
+.card{background:rgba(255,248,250,.74);border:1px solid rgba(58,31,43,.12);box-shadow:0 10px 30px rgba(120,40,70,.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card h3{font:400 40px/1 "Great Vibes",cursive}
+.card ul{font-size:15px;color:#4a2a37}
+kbd{background:rgba(58,31,43,.08)}
+#copy{font-size:14px}
+pre{background:rgba(58,31,43,.06);color:#3a1f2b}
+.steps{color:#6a4352}
+footer{color:#8a5a6c}
+.garden{position:fixed;left:0;right:0;bottom:0;height:120px;z-index:0;pointer-events:none}
+</style>
+</head>
+<body>
+<svg class="garden" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><g id="fl"><circle r="9" fill="#f6a7bd"/><circle cx="9" cy="-3" r="7" fill="#f6a7bd"/><circle cx="-9" cy="-3" r="7" fill="#f6a7bd"/><circle cx="5" cy="8" r="7" fill="#f6a7bd"/><circle cx="-5" cy="8" r="7" fill="#f6a7bd"/><circle r="4" fill="#ffd36b"/></g></defs><path d="M0 120 L0 100 Q300 88 600 98 T1200 96 L1200 120Z" fill="#7bb27a"/><g stroke="#4f8a55" stroke-width="2" fill="none"><path d="M90 104 Q85 70 96 52"/><path d="M260 104 Q270 72 258 40"/><path d="M430 104 Q420 80 432 62"/><path d="M640 104 Q650 70 638 46"/><path d="M820 104 Q812 76 826 58"/><path d="M1010 104 Q1020 70 1006 44"/><path d="M1140 104 Q1134 82 1146 66"/></g><use href="#fl" x="96" y="50"/><use href="#fl" x="258" y="38"/><use href="#fl" x="432" y="60"/><use href="#fl" x="638" y="44"/><use href="#fl" x="826" y="56"/><use href="#fl" x="1006" y="42"/><use href="#fl" x="1146" y="64"/></svg>
+<main>
+  <a class="back" href="../">← back to the pond</a>
+  <section class="hero">
+    <h1>bloom by smile</h1>
+    <p>Smile and the garden grows. Frown and the flowers wilt. Keep smiling and the butterflies come to visit.</p>
+    <a class="preview" href="garden.html" aria-label="open smile garden"><canvas id="pv"></canvas><span class="tag">▶ tap to open</span></a>
+    <div class="acts"><a class="btn" href="garden.html">open it now →</a><a class="btn alt" href="https://www.instagram.com/reel/DgCgAfIgVpX/" target="_blank" rel="noopener">watch the reel ↗</a></div>
+  </section>
+
+  <p class="kicker">two ways to try it</p>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">01</span><h3>play with it now</h3></div>
+    <p class="sub">it's already live, 2 versions. allow the camera and keep a relaxed face for two seconds while it learns your neutral look.</p>
+    <div class="ver"><h4>laptop version</h4><p>a storybook garden grows along the bottom of your webcam.</p><ul><li>smile to grow flowers · frown to make them wilt · keep smiling and butterflies visit</li><li>sensitivity sliders help if it misses your smile · <kbd>H</kbd> hides the controls</li></ul><a class="go" href="garden.html">open on a laptop ↗</a></div><div class="ver"><h4>phone version 📱</h4><p>front camera, made for a vertical screen. tap anywhere to bring the controls back.</p><ul><li>works on iPhone and Android in the browser</li><li>use <b>Flip camera</b> to switch to the back camera</li></ul><a class="go" href="garden-phone.html">open on a phone ↗</a></div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title"><span class="n">02</span><h3>build your own smile garden</h3></div>
+    <p class="sub">copy my prompt into Claude or ChatGPT and ask it to build you a single HTML file. you might need to tweak a few things depending on your setup. i wrote down the <a href="#bugs" style="color:inherit">bugs i ran into</a> (they're baked into the prompt too), so you can skip some of the trial and error.</p>
+    <div class="meta"><span class="pill">⏱ takes ~15 minutes</span><span class="pill">single HTML file</span><span class="pill">laptop or phone + camera</span></div>
+    <div class="acts left"><button class="btn" id="copy">copy prompt</button><a class="btn alt" href="garden.html">see mine first</a></div>
+    <pre id="prompt">Build a single standalone HTML file called bloom-by-smile.html that I open in Chrome on my laptop. It&#x27;s a storybook garden that grows along the bottom of my mirrored webcam: tender, playful, a little magic. Use MediaPipe Face Landmarker (tasks-vision 0.10.14 from jsDelivr, GPU with CPU fallback) with face blendshapes.
+
+Smile: when I smile, flowers sprout from the bottom edge on curving stems with leaves and the odd curly tendril, grow, form a bud and pop open with little white sparkles. Use six hand-drawn flower kinds with soft gradients and a gentle glow: cosmos, daisy, layered peony, tulip, bluebell and forget-me-not clusters, in blush, peony, buttercup, lilac and forget-me-not colours. Stems sway, a strip of grass sways along the bottom, and the bottom of the screen glows pink. Once 6+ flowers are in bloom, butterflies flutter in and visit them, and glowing motes drift up from the blooms. Cap it at 60 flowers (revive the most wilted one instead of adding more).
+
+Frown: when I frown, stems droop, colours fade to dusty tones, petals drop and drift to the ground, the screen dims slightly grey and the butterflies fly away. Detect frowns against a baseline: on start, learn my neutral face over ~50 frames, then compare mouth-corner drop, mouthFrown, browDown, browInnerUp, mouthShrugLower and mouthPress against it. Ignore frowns while I&#x27;m smiling. Smiling again brings the garden back.
+
+UI: a frosted glass card top-left with the title in Great Vibes, live smile and frown bars with a threshold line, a status line (&quot;smile to grow&quot;, &quot;blooming…&quot;, &quot;wilting…&quot;, &quot;relax your face… learning&quot;) and &quot;X flowers in bloom&quot;. Controls bottom-right as glass pills: smile and frown sensitivity sliders, a camera picker dropdown, Recalibrate, Backdrop (swaps the camera for a plain blush-pink background), Reset, Fullscreen, Hide UI (H). Hold S to fake a smile and D to fake a frown. Intro screen: &quot;bloom by smile&quot; / &quot;Smile and the garden grows. Frown and the flowers wilt.&quot; / &quot;Open the garden&quot;, plus a note to keep a relaxed face for two seconds. Fonts: Great Vibes + DM Sans. Ask for the camera at up to 4K. Nothing is uploaded.
+
+Also make bloom-by-smile-phone.html: front camera by default with a Flip camera button, fits a vertical screen and the iPhone notch (safe areas), full-width card and centred controls, Hide gives a clean screen and tapping anywhere brings the controls back, max 38 flowers on narrow screens, and a clear message if the camera is blocked or the page isn&#x27;t on https. Tell me how to put it online with Netlify Drop so my iPhone can open it.
+
+BUGS I RAN INTO (handle these from the start):
+- my frowns didn&#x27;t register → learn my neutral face for ~2 seconds first and compare frowns against it, with smile and frown sensitivity sliders
+- smiling sometimes counted as frowning → ignore frowns while a smile is detected
+- it got laggy once the garden filled up → cap it at 60 flowers (38 on phones) and revive the most wilted one instead of adding more
+- the camera was blocked on my phone → the page has to be on https (e.g. Netlify), not opened as a file</pre>
+    <p class="sub" style="margin-top:14px">have fun making yours :) save the file, open it in Chrome, and tag me if you post it.</p>
+  </section>
+
+  <section class="card" id="bugs">
+    <div class="sec-title"><span class="n">✎</span><h3>bugs i ran into</h3></div>
+    <p class="sub">if yours does something weird, it's probably one of these. paste the fix back into the chat.</p>
+    <ul class="bugs"><li><b>my frowns didn't register</b><span>fix: learn my neutral face for ~2 seconds first and compare frowns against it, with smile and frown sensitivity sliders</span></li><li><b>smiling sometimes counted as frowning</b><span>fix: ignore frowns while a smile is detected</span></li><li><b>it got laggy once the garden filled up</b><span>fix: cap it at 60 flowers (38 on phones) and revive the most wilted one instead of adding more</span></li><li><b>the camera was blocked on my phone</b><span>fix: the page has to be on https (e.g. Netlify), not opened as a file</span></li></ul>
+  </section>
+
+  <footer>made by <a href="https://www.instagram.com/imeleshi/" target="_blank" rel="noopener">@imeleshi</a> with Claude · <a href="../">more little things in the pond</a></footer>
+</main>
+<script>
+{
+const b=document.getElementById('copy');
+b.addEventListener('click',async()=>{
+  const t=document.getElementById('prompt').textContent;
+  try{await navigator.clipboard.writeText(t);b.textContent='copied ✓';}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('prompt'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='selected — press ⌘C';}
+  setTimeout(()=>b.textContent='copy prompt',2200);
+});
+}
+</script>
+<script>
+{
+const cv=document.getElementById('pv');if(cv){
+const x=cv.getContext('2d');let W,H,t0=performance.now();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=cv.width=r.width*d;H=cv.height=r.height*d;}
+addEventListener('resize',size);size();
+const draw=(x,W,H,t)=>{
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fff4f6');g.addColorStop(1,'#efc3d1');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const cyc=10,k=t%cyc,sm=k<6?Math.min(k/1.2,1):k<8?Math.max(1-(k-6)/.6,-1)*1:Math.min(-1+(k-8)/2*2,1);const smile=Math.max(sm,0),frown=Math.max(-sm,0);
+ const grow=k<6?Math.min(k/5,1):k<8?1:1-(k-8)/2;
+ const cx=W/2,cy=H*.32,R=H*.15;x.fillStyle='#ffe2b8';x.strokeStyle='#3a1f2b';x.lineWidth=W*.004;x.beginPath();x.arc(cx,cy,R,0,6.28);x.fill();x.stroke();
+ x.fillStyle='#3a1f2b';[-1,1].forEach(s=>{x.beginPath();x.ellipse(cx+s*R*.35,cy-R*.15,R*.07,R*.1*(1-smile*.4),0,0,6.28);x.fill();});
+ x.fillStyle='rgba(246,140,170,.5)';[-1,1].forEach(s=>{x.beginPath();x.ellipse(cx+s*R*.55,cy+R*.2,R*.14,R*.08,0,0,6.28);x.fill();});
+ x.beginPath();x.moveTo(cx-R*.35,cy+R*.35);x.quadraticCurveTo(cx,cy+R*.35+R*.4*(smile-frown),cx+R*.35,cy+R*.35);x.stroke();
+ const cols=['#f6a7bd','#ffd36b','#c9a7f0','#ff8fab','#9cc3ff','#ffffff'];
+ for(let i=0;i<9;i++){const fx=W*(.07+i*.108),h=H*(.22+((i*37)%5)*.04)*Math.min(Math.max(grow*1.4-i*.05,0),1),droop=frown*.6+(k>=8?(1-grow)*.4:0);
+  if(h<2)continue;const by=H,tx=fx+Math.sin(t*1.5+i)*W*.008+droop*W*.05,ty=by-h*(1-droop*.3);
+  x.strokeStyle=`rgb(${79+droop*80},${138-droop*20},${85})`;x.lineWidth=W*.004;x.beginPath();x.moveTo(fx,by);x.quadraticCurveTo(fx-W*.02,by-h*.5,tx,ty);x.stroke();
+  const bloom=Math.min(Math.max((grow-.3-i*.03)*2,0),1)*(1-droop*.5);if(bloom>0){const pr=W*.022*bloom;x.fillStyle=cols[i%6];x.globalAlpha=1-droop*.5;
+   for(let p=0;p<5;p++){const a=p/5*6.28+t*.2;x.beginPath();x.arc(tx+Math.cos(a)*pr,ty+Math.sin(a)*pr,pr*.75,0,6.28);x.fill();}
+   x.fillStyle='#ffd36b';x.beginPath();x.arc(tx,ty,pr*.5,0,6.28);x.fill();x.globalAlpha=1;}}
+ if(grow>.8&&frown<.1){const bx=W*(.5+.35*Math.sin(t*.7)),by=H*(.55+.1*Math.sin(t*1.3)),f=Math.abs(Math.sin(t*12));x.fillStyle='#c9a7f0';[-1,1].forEach(s=>{x.beginPath();x.ellipse(bx+s*W*.012*f,by,W*.012*f,W*.016,0,0,6.28);x.fill();});}
+ x.font=`${Math.round(W*.03)}px "DM Sans",sans-serif`;x.textAlign='center';x.fillStyle='#5a3442';x.fillText(frown>.2?'wilting…':smile>.5?'blooming…':'smile to grow',W/2,H*.08);};
+function loop(now){draw(x,W,H,Math.max(0,(now-t0)/1000));if(!reduce)requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+}}
+</script>
+
+</body>
+</html>
