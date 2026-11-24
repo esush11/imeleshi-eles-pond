@@ -1,0 +1,12 @@
+Build a single standalone HTML file called i-love-you-so-much.html that I open in Chrome. Use MediaPipe Hand Landmarker (tasks-vision 0.10.14, 2 hands) on my webcam, drawn mirrored onto a canvas on a black page. Draw a red dot (#ff1010) on all ten fingertips. Put a word just above some fingertip dots, in italic Arial, centred, following my fingers smoothly:
+- Left hand (shows on the right of the screen): index = "I" (#9a2bff), middle = "love" (#7dff1f), ring = "you" (#1f1fff)
+- Right hand: index = "so" (#2ee6e6), middle = "much" (#ff2a8a)
+Keep these in two editable lines at the top of the script called HAND_A and HAND_B.
+
+Pinch detection on screen: when my thumb's red dot touches a fingertip's dot, that word plays and briefly pops bigger. It counts as touching within about 1.6 dot-widths centre to centre, or 30% of the hand's size when my hand is close. All four fingers compete and only the closest fires, once per pinch; it can't fire again until the dots move 1.7x further apart, plus a 120 ms cooldown.
+
+Sounds panel: each word uses the browser's voice until I record my own. Per word: play, record (1.5 seconds, or tap to stop), upload a clip, and clear. Trim silence from recordings, normalise the volume and save them in the browser. Only open the microphone while recording a word, so the speakers don't drop into laggy call-mode audio. Run all word sounds through a limiter so overlapping words don't crackle. Options: "Also record my mic in clips" (off by default), "Flash the word when it's triggered" (on), a Tight <-> Loose pinch slider (remembered), and "Show detection" (a ring on the active finger and a number per finger, below 1.00 = touching).
+
+Bottom controls: Landscape / Vertical 9:16 output, Sounds, Flip camera (cycles cameras on laptops), Swap hands, Record / Save clip (the canvas plus word sounds, .mp4 if supported, otherwise .webm), Hide controls (H brings them back). Start screen shows the phrase in its colours with a "Start camera" button. On phones, use 720p, run detection a bit less often, and resume audio on every tap and when the page comes back into view.
+
+(For a different phrase, swap the words in HAND_A and HAND_B, keep the same colours in the same finger positions, and change the title, start screen text and saved clip name to match.)

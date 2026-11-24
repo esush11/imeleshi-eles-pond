@@ -1,0 +1,42 @@
+Build a single standalone HTML file called fish-tank.html that I open in Chrome on my laptop. It turns my screen into a dreamy aquarium in the style of Wong Kar-wai's films (the goldfish tank in Chungking Express) and neon-lit aquarium photoshoots: late-night Hong Kong fish shop, nostalgic, a little lonely, glowing.
+
+PERFORMANCE
+Keep it fast: draw 2D layers on canvases at most 960 px wide, render WebGL at 1x (max 1600 px wide), never use canvas blur filters (fake blur by drawing small and scaling up), and run any hand tracking or segmentation at about 15–20 checks a second. Fall back to plain 2D if WebGL is missing.
+
+TANK (normal mode)
+Two 2D canvases: a BACK layer (teal water gradient, soft coloured bokeh light circles, swaying back plants, gravel, an air stone and tube, slow diagonal light shafts) and a FRONT layer (bubbles, food flakes, twinkling specks and glints on the glass, blurred out-of-focus front plants at the corners, the water surface line, a flickering fluorescent tube above the water, dark glass frame edges, a faint diagonal glass reflection). Bubbles make tiny ripples when they pop at the surface.
+
+3D GOLDFISH (WebGL)
+About 15 goldfish rendered as real 3D meshes from one procedural mesh: rounded body with elliptical cross-sections and a deeper belly, a forked double tail, a sail-like dorsal fin, an anal fin, and paired pelvic and pectoral fins. Varieties: mostly deep orange and red-orange, some gold, a few red-and-white and pearl white.
+- Vertex shader: bend the spine in a travelling wave that grows towards the tail, ripple the tail and fins, flap the pectorals, then pitch and yaw each fish so it really rotates in space when it turns around (randomly turning towards or away from the viewer).
+- Fragment shader: light the body with the mood's two coloured lights (wrap diffuse, sharp specular modulated by a procedural scale pattern, a coloured fresnel rim, a slight self-glow), pale belly and darker back, noise-based red/white patches, a dark eye with a gold ring, a gill line. Fins are translucent with faint rays and soft fading edges. Fish take on the colour of the light and fade towards the water colour with distance.
+- Depth of field: draw far fish and the nearest fish into small framebuffers so they look out of focus, the middle ones sharp, and composite them between the BACK and FRONT layers.
+- Behaviour: fish wander with smooth steering, swim faster with faster tail beats, dart away from pokes then some come back curiously, swim up to eat food, and gather around my hand.
+
+WATER + FILM LOOK (WebGL passes)
+- A ripple height field (about 200 cells wide) refracts everything, with chromatic aberration and highlights on the ripple rings.
+- Feedback pass blending with the previous frame for soft trails, plus an optional "step-print" mode (off by default) that only updates every third frame with heavier blending, for Wong Kar-wai stutter.
+- Dreamy glow: bloom at 1/4 and 1/10 size, taken only from the tank layers and fish (never from my camera, so my face never blows out), with a glow slider.
+- Final pass: soft tone-mapping, film grain, vignette, slight gate weave, a warm light leak, fluorescent flicker.
+
+LIGHTING MOODS (M cycles, colours fade smoothly)
+chungking green, neon pink, blacklight blue (fish glow white-cyan), jade, goldfish glow, magenta haze, aqua. Each mood has water/deep colours, two light colours (lightA, lightB), a fish tint, bokeh colours and a colour grade.
+
+YOU BEHIND THE GLASS (button)
+Show my mirrored webcam behind the water as a close-up (no tank props, bigger fish in front of me, bubbles rising). Keep my room visible but light it like a neon aquarium: two coloured lights blending across the frame, slight soft focus, shadows lifted into the mood colour, darker edges, and auto-exposure so a bright webcam never blows out. A "room: showing / dimmed" button uses the MediaPipe selfie segmenter to fade the room only when I ask. Switch to neon pink when this turns on.
+
+INTERACTION
+- Click/tap = poke: big ripple, a water "plip" sound, nearby fish dart away. Dragging trails small ripples.
+- Space or the feed button sprinkles food that sinks.
+- "Hand play" (MediaPipe Hand Landmarker): my fingertip glows and leaves ripples, pinching thumb and index pokes, an open palm makes the fish gather around it. Show a small status pill (no hand seen / fingertip / pinch / open palm).
+
+CONTROLS
+Frosted glass pills along the bottom (DM Mono): you behind the glass, room, hand play, light (mood), glow slider, feed, step-print, subtitles, sound, a camera-icon button, record / save clip, full screen, hide (H, also hides the cursor).
+- Camera button (and S key): save a PNG of the tank exactly as shown, without the controls, subtitles burned in if on, with a white flash, a shutter sound and a "Saved to your Downloads" toast.
+- Record (R): record the canvas plus sound as .mp4 if supported, otherwise .webm, with subtitles burned in.
+- Subtitles: original yellow bilingual Chinese + English film-style lines (none quoted from real films), changing every 7 seconds.
+- Sound: generated aquarium hum, filter bubbling, fluorescent buzz, plus plip, bloop, gulp and sprinkle effects.
+- Keys: Space feed, M mood, S picture, R record, F full screen, H hide.
+
+START SCREEN
+Big "魚缸" in Noto Serif TC glowing goldfish orange, "the fish tank" in Cormorant italic, a short line about poking the glass, and a yellow "turn on the tank" button that goes full screen. Only ask for the camera when I turn on a camera option. Everything runs in the browser; nothing is uploaded.
