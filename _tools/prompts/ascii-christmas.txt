@@ -11,7 +11,7 @@ SCENE
 Night sky (navy gradient, twinkling . + * stars, the odd shooting star), a big shaded ASCII moon top-right, falling snow, and "merry christmas" in a gold italic serif (Cormorant Garamond) with a small mono line underneath.
 
 ANIMATION (~15 seconds, R replays)
-1. Ground and trunk appear, then the tree grows from the bottom up while spinning, with a scrambling front edge and a soft typewriter tick.
+1. Ground and trunk appear, then the tree grows from the bottom up while spinning, with a scrambling front edge and a soft typewriter tick. While it grows, play shimmery original music: a soft swelling pad (C maj9 → F maj9 → G9, detuned sine + triangle through a lowpass that slowly opens) with twinkling high pentatonic notes through a feedback echo that get faster as the tree grows, and a rising sparkle run as the star arrives, then crossfade into the music box.
 2. The star drops on with a little bounce and a shimmer of bells.
 3. Ornaments pop on from the bottom up with little bell notes; the garlands start chasing; presents pop in; snow starts; the message fades in.
 4. Santa's sleigh (ASCII reindeer pulling a red sleigh) flies from in front of the moon across the top of the sky, above the tree, trailing gold sparkles, with sleigh bells. It comes back every ~25 seconds, or with J / the sleigh button.

@@ -268,6 +268,36 @@ function startMusic(){
     [[1,'triangle',.06],[2,'sine',.025]].forEach(([mul,ty,v])=>{const o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f*mul;env(g,t,v,1.1);o.connect(g);g.connect(master);o.start(t);o.stop(t+1.2);});
     nextNote+=d;noteI++;if(noteI%TUNE.length===0)nextNote+=1.2;}},90);
 }
+
+// shimmery ambient while the tree grows (original): soft swelling pad + twinkling high notes through an echo
+let shim=null;
+function startShimmer(){
+  if(!ac)return;stopShimmer(true);
+  const t=ac.currentTime,g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.55,t+2.2);
+  const d=ac.createDelay(1);d.delayTime.value=.31;const fb=ac.createGain();fb.gain.value=.5;const lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5200;
+  const wet=ac.createGain();wet.gain.value=.45;
+  g.connect(master);g.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(wet);wet.connect(master);
+  const pf=ac.createBiquadFilter();pf.type='lowpass';pf.frequency.setValueAtTime(450,t);pf.frequency.exponentialRampToValueAtTime(3200,t+8.5);pf.connect(g);
+  const oscs=[];
+  const chord=(notes,at,len)=>notes.forEach(f=>[-7,7].forEach((det,k)=>{const o=ac.createOscillator(),og=ac.createGain();o.type=k?'triangle':'sine';o.frequency.value=f;o.detune.value=det;
+    og.gain.setValueAtTime(0,t+at);og.gain.linearRampToValueAtTime(.028,t+at+1.4);og.gain.setValueAtTime(.028,t+at+len-1.2);og.gain.linearRampToValueAtTime(0,t+at+len+.6);
+    o.connect(og);og.connect(pf);o.start(t+at);o.stop(t+at+len+.8);oscs.push(o);}));
+  chord([261.63,329.63,392,493.88,587.33],0,4.6);      // C maj9
+  chord([174.61,220,261.63,329.63,392],4.2,3.4);        // F maj9
+  chord([196,246.94,293.66,349.23,440],7.2,2.8);        // G9, resolving into the music box
+  const TW=[1046.5,1174.66,1318.5,1567.98,1760,2093,2349.3,2637,3136];
+  const pings=[];let tt=t+.3;
+  while(tt<t+9.4){const p=(tt-t)/9.4,f=TW[Math.floor(Math.random()*(4+p*5))];
+    const o=ac.createOscillator(),og=ac.createGain();o.type='sine';o.frequency.value=f;og.gain.setValueAtTime(0,tt);og.gain.linearRampToValueAtTime(.022+p*.02,tt+.006);og.gain.exponentialRampToValueAtTime(.0001,tt+.7);
+    o.connect(og);og.connect(g);o.start(tt);o.stop(tt+.75);pings.push(o);tt+=.26-p*.16+Math.random()*.08;}
+  // a rising sparkle run as the star arrives
+  for(let i=0;i<12;i++){const at=t+8.1+i*.05,o=ac.createOscillator(),og=ac.createGain();o.type='sine';o.frequency.value=TW[i%9]*(i>8?2:1);og.gain.setValueAtTime(0,at);og.gain.linearRampToValueAtTime(.03,at+.005);og.gain.exponentialRampToValueAtTime(.0001,at+.9);o.connect(og);og.connect(g);o.start(at);o.stop(at+1);pings.push(o);}
+  shim={g,wet,oscs,pings,fading:false};
+}
+function stopShimmer(now){if(!shim||!ac)return;const t=ac.currentTime,s=shim;shim=null;
+  s.g.gain.cancelScheduledValues(t);s.g.gain.setValueAtTime(s.g.gain.value,t);s.g.gain.linearRampToValueAtTime(0,t+(now?.15:2));
+  s.wet.gain.setValueAtTime(s.wet.gain.value,t);s.wet.gain.linearRampToValueAtTime(0,t+(now?.2:3));
+  setTimeout(()=>[...s.oscs,...s.pings].forEach(o=>{try{o.stop();}catch(_){}}),(now?300:3200));}
 function stopMusic(){musicOn=false;clearInterval(musicTimer);}
 
 
@@ -322,7 +352,7 @@ function drawTip(t){if(!tip||!handOn)return;x.globalCompositeOperation='lighter'
 // ---------- timeline ----------
 let t0=performance.now(),lastRow=-1,starRung=false,snowBoost=false,sleighs=[],trail=[],shoots=[],nextSleigh=0,bursts=[],sky=[],snow=[];
 const STAR_AT=8.8,SLEIGH_AT=13,DONE=13.5;
-function restart(newSeed=true){if(newSeed)build(Math.floor(Math.random()*1e9));t0=performance.now();lastRow=-1;starRung=false;snow=[];sleighs=[];trail=[];bursts=[];orns.forEach(o=>o.popped=false);stopMusic();nextSleigh=SLEIGH_AT;}
+function restart(newSeed=true){if(newSeed)build(Math.floor(Math.random()*1e9));t0=performance.now();lastRow=-1;starRung=false;snow=[];sleighs=[];trail=[];bursts=[];orns.forEach(o=>o.popped=false);stopMusic();nextSleigh=SLEIGH_AT;if(!reduce)startShimmer();}
 function launchSleigh(e){sleighs.push({start:e,dur:6});if(!reduce)sleighBells(6);}
 let stopped=true,lastNow=0;
 function frame(now){
@@ -365,7 +395,7 @@ function frame(now){
   const lit=orns.filter(o=>e>=o.on).length;
   if(lit){x.globalCompositeOperation='lighter';x.globalAlpha=Math.min(.28,lit*.008);const hs=K*1.7;x.drawImage(sprite('#ffcf6b'),scx-hs/2,scy-K*.5-hs/2,hs,hs);x.globalAlpha=1;x.globalCompositeOperation='source-over';}
   handTick(now,e);render3D(e,t);draw3D(e,t);
-  if(e>=9.9&&!musicOn&&!reduce)startMusic();
+  if(e>=9.9&&!musicOn&&!reduce){startMusic();stopShimmer(false);}
   // click bursts
   x.font=mono(chH*1.1);
   for(const b of bursts){b.life-=.02;for(const q of b.p){q.x+=q.vx;q.y+=q.vy;q.vy+=.05*DPR;x.globalAlpha=Math.max(0,b.life);x.fillStyle=q.col;x.fillText(q.ch,q.x,q.y);}}
